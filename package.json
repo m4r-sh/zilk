@@ -1,0 +1,14 @@
+{
+  "version": "0.0.0",
+  "name": "zilk",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m4r-sh/zilk.git"
+  },
+  "description": "light yet powerful web framework",
+  "author": {
+    "name": "m4rsh",
+    "email": "me@m4r.sh",
+    "url": "https://m4r.sh"
+  }
+}
