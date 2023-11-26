@@ -1,14 +1,30 @@
 {
   "version": "0.0.0",
   "name": "zilk",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/m4r-sh/zilk.git"
-  },
-  "description": "light yet powerful web framework",
+  "description": "lightweight and flexible web framework",
   "author": {
     "name": "m4rsh",
     "email": "me@m4r.sh",
     "url": "https://m4r.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m4r-sh/zilk.git"
+  },
+  "scripts": {
+    "build": "bun ./scripts/build.js"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "bun": "./build/ssr/index.js",
+      "import": "./build/index.js",
+      "require": "./build/index.js"
+    }
+  },
+  "dependencies": {
+    "uhtml": "^4.1.20",
+    "uhtml-ssr": "^0.9.1",
+    "wicked-elements": "^3.1.2"
   }
 }
