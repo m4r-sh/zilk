@@ -4,6 +4,8 @@ lightweight & flexible web architecture
 
 - template literal rendering (powered by uhtml)
 - reactive data objects (orbz)
-- modular build system
+- powerful build system (zilker)
 
-**[Documentation](https://m4r-sh.github.io/zilk/)**
+**[Documentation](https://zilk.tech/docs)**
+
+**[zilk.tech](https://zilk.tech)**

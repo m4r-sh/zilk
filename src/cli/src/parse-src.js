@@ -1,1 +1,0 @@
-// look for errors, bad practices, etc

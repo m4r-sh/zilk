@@ -1,10 +1,13 @@
-// uhtml
+// @bun
+// node_modules/@webreflection/mapset/esm/index.js
 class WeakMapSet extends WeakMap {
   set(key, value) {
     super.set(key, value);
     return value;
   }
 }
+
+// node_modules/uhtml-ssr/node_modules/@webreflection/uparser/esm/index.js
 /*! (c) Andrea Giammarchi - ISC */
 var empty = /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
 var elements = /<([a-z]+[a-z0-9:._-]*)([^>]*?)(\/?)>/g;
@@ -19,6 +22,8 @@ var esm_default = (template, prefix, svg) => {
     return "<" + ml + ">";
   }).replace(holes, (hole) => hole === "\x01" ? "<!--" + prefix + i++ + "-->" : prefix + i++);
 };
+
+// node_modules/html-escaper/esm/index.js
 var { replace } = "";
 var ca = /[&<>'"]/g;
 var esca = {
@@ -30,7 +35,11 @@ var esca = {
 };
 var pe = (m) => esca[m];
 var escape = (es) => replace.call(es, ca, pe);
+
+// node_modules/uhyphen/esm/index.js
 var esm_default2 = (camel) => camel.replace(/(([A-Z0-9])([A-Z0-9][a-z]))|(([a-z])([A-Z]))/g, "$2$5-$3$6").toLowerCase();
+
+// node_modules/uhandlers/esm/index.js
 var ref = (node) => {
   let oldValue;
   return (value) => {
@@ -43,6 +52,8 @@ var ref = (node) => {
     }
   };
 };
+
+// node_modules/uhtml-ssr/esm/utils.js
 var aria = function(key) {
   const value = escape(this[key]);
   return key === "role" ? ` role="${value}"` : ` aria-${key.toLowerCase()}="${value}"`;
@@ -195,6 +206,8 @@ var parse = (template, expectedLength, svg) => {
     updates.push(() => html);
   return updates;
 };
+
+// node_modules/uhtml-ssr/esm/index.js
 var update = function(value, i) {
   return this[i](value);
 };
@@ -216,7 +229,7 @@ var render = (where, what) => {
   return typeof where === "function" ? where(content) : (where.write(content), where);
 };
 
-// src/viewz/src/index.js
+// src/render/shared.js
 var classify = function(n) {
   return new Proxy({}, {
     get(_, prop) {
@@ -246,7 +259,10 @@ var raw = new Proxy(plain, {
 });
 var css = raw.css;
 
-// src/orbz/src/OrbCore.js
+// src/render/server.js
+var htmlFor = html.for;
+var svgFor = svg.for;
+// /Users/marshall/code/stabilimentum/packages/zilk/node_modules/orbz/build/bun/index.js
 var diff_acc = function(before, after) {
   let toRemove = new Set([...before].filter((x) => !after.has(x)));
   let toAdd = new Set([...after].filter((x) => !before.has(x)));
@@ -291,7 +307,7 @@ class OrbCore {
     this.#models = defs.orbs;
     for (const key in defs.state) {
       this.#dep_graph[key] = new Set;
-      this.set_state(key, key in state ? state[key] : defs.state[key]);
+      this.set_state(key, key in state ? state[key] : structuredClone(defs.state[key]));
     }
     for (const key in defs.orbs) {
       this.#dep_graph[key] = new Set;
@@ -299,6 +315,9 @@ class OrbCore {
     }
     for (const key in defs.entry) {
       this.#entrypoints[key] = defs.entry[key].bind(this.#this_orb);
+    }
+    for (const key in defs.async) {
+      this.#entrypoints[key] = defs.async[key].bind(this.#this_orb);
     }
     for (const key in defs.derived) {
       this.#dep_graph[key] = new Set;
@@ -313,12 +332,10 @@ class OrbCore {
     }
   }
   add_link(k, options) {
-    console.log("link " + k);
     let link_set = this.#link_graph[k];
     return (external_cb) => {
       link_set.add(external_cb);
       return () => {
-        console.log("remove link");
         link_set.delete(external_cb);
       };
     };
@@ -358,20 +375,28 @@ class OrbCore {
       return res;
     }
   }
-  run_entrypoint(k, args) {
+  run_entrypoint(k, args, { async = false } = {}) {
     if (!k.startsWith("_") || this.#isLocal()) {
       if (this.#entrypoints[k]) {
-        entry_count++;
+        if (!async) {
+          entry_count++;
+        }
         let result = this.#entrypoints[k](...args);
-        entry_count--;
-        this.#flush();
-        return result;
+        if (async) {
+          return result.then((ans) => {
+            this.#flush();
+            return ans;
+          });
+        } else {
+          entry_count--;
+          this.#flush();
+          return result;
+        }
       }
     }
   }
   set_orb(k, v) {
     let def_model = this.#models[k];
-    console.log("setting " + k + " " + v);
     if (v && v instanceof def_model) {
       this.#orbs[k] = v;
     } else if (v && typeof v == "object") {
@@ -381,7 +406,6 @@ class OrbCore {
     }
   }
   get_orb(k) {
-    prefix2 = `${prefix2}${k}.`;
     return this.#orbs[k];
   }
   #isLocal() {
@@ -415,7 +439,9 @@ class OrbCore {
         this.#get_watchlists[key].delete(r_k);
       });
       toAdd.forEach((a_k) => {
-        this.#dep_graph[a_k].add(key);
+        if (this.#dep_graph[a_k]) {
+          this.#dep_graph[a_k].add(key);
+        }
         this.#get_watchlists[key].add(a_k);
       });
       toSub.forEach(([orb, acc_keys]) => {
@@ -457,49 +483,65 @@ class OrbCore {
           if (watchlist.size == 0) {
             this.#subs.delete(cb);
           }
-          console.log("fx: accessed " + [...watchlist].join(", "));
         }
       });
       this.#changed.clear();
     }
   }
 }
-
-// src/orbz/src/index.js
+var $Z2 = Symbol("orb-core");
+var $L = Symbol("list-core");
+var MODEL_SELF = Symbol("m-self");
+var SYMBOL_ISMODEL = Symbol("orbz-ismodel");
+var Z_DEFS = Symbol("model-def");
+var Z_MODEL_IDS = Symbol("model-id");
+var MODEL_IMPLEMENTS = Symbol("model-id");
 var Model = function() {
   let { defs, types } = scan(arguments[arguments.length - 1]);
+  let model_id = Symbol("unique-model-id");
+  let ids = [model_id];
   for (let i = arguments.length - 2;i >= 0; i--) {
     defs = deepMerge(arguments[i][Z_DEFS], defs);
+    ids.push(...arguments[i][Z_MODEL_IDS]);
   }
   function ModelConstructor(state = {}) {
     if (!new.target) {
       return new ModelConstructor(state);
     }
-    Object.defineProperty(this, $Z, { value: new OrbCore(defs, state, this) });
+    Object.defineProperty(this, $Z2, { value: new OrbCore(defs, state, this) });
+    Object.defineProperty(this, MODEL_IMPLEMENTS, { value: ids });
     Object.preventExtensions(this);
   }
+  Object.defineProperty(ModelConstructor, Symbol.hasInstance, {
+    value: function(o) {
+      return o && o[MODEL_IMPLEMENTS] && o[MODEL_IMPLEMENTS].includes(model_id);
+    }
+  });
   ModelConstructor[Z_DEFS] = defs;
-  if (arguments.length >= 2) {
-    Object.setPrototypeOf(ModelConstructor.prototype, arguments[0]);
-  }
+  ModelConstructor[Z_MODEL_IDS] = ids;
   Object.keys(defs.orbs).forEach((k) => {
     if (defs.orbs[k] == MODEL_SELF) {
       defs.orbs[k] = ModelConstructor;
     }
   });
-  Object.defineProperty(ModelConstructor, SYMBOL_ISMODEL, { value: true });
   Object.keys(defs.entry).forEach((k) => {
     Object.defineProperty(ModelConstructor.prototype, k, {
       value: function() {
-        return this[$Z].run_entrypoint(k, arguments);
-      },
-      enumerable: !k.startsWith("_")
+        return this[$Z2].run_entrypoint(k, arguments, { async: false });
+      }
+    });
+  });
+  Object.keys(defs.async).forEach((k) => {
+    Object.defineProperty(ModelConstructor.prototype, k, {
+      value: function() {
+        return this[$Z2].run_entrypoint(k, arguments, { async: true });
+      }
     });
   });
   Object.keys(defs.derived).forEach((k) => {
     Object.defineProperty(ModelConstructor.prototype, k, {
       get() {
-        return this[$Z].get_derived(k);
+        return this[$Z2].get_derived(k);
       },
       enumerable: !k.startsWith("_")
     });
@@ -507,10 +549,10 @@ var Model = function() {
   Object.keys(defs.getset).forEach((k) => {
     Object.defineProperty(ModelConstructor.prototype, k, {
       get() {
-        return this[$Z].get_derived(k);
+        return this[$Z2].get_derived(k);
       },
       set(v) {
-        return this[$Z].run_entrypoint(k, [v]);
+        return this[$Z2].run_entrypoint(k, [v]);
       },
       enumerable: !k.startsWith("_")
     });
@@ -518,10 +560,10 @@ var Model = function() {
   Object.keys(defs.state).forEach((k) => {
     Object.defineProperty(ModelConstructor.prototype, k, {
       get() {
-        return this[$Z].get_state(k);
+        return this[$Z2].get_state(k);
       },
       set(v) {
-        this[$Z].set_state(k, v);
+        this[$Z2].set_state(k, v);
       },
       enumerable: !k.startsWith("_")
     });
@@ -529,10 +571,10 @@ var Model = function() {
   Object.keys(defs.orbs).forEach((k) => {
     Object.defineProperty(ModelConstructor.prototype, k, {
       get() {
-        return this[$Z].get_orb(k);
+        return this[$Z2].get_orb(k);
       },
       set(v) {
-        this[$Z].set_orb(k, v);
+        this[$Z2].set_orb(k, v);
       },
       enumerable: !k.startsWith("_")
     });
@@ -540,16 +582,14 @@ var Model = function() {
   Object.defineProperties(ModelConstructor.prototype, shared_proto);
   return ModelConstructor;
 };
-var Orb = function(def) {
-  return Model(def)();
-};
 var scan = function(model) {
   let defs = {
     state: {},
     derived: {},
     entry: {},
     orbs: {},
-    getset: {}
+    getset: {},
+    async: {}
   };
   let types = {};
   let prop_descs = Object.getOwnPropertyDescriptors(model);
@@ -569,6 +609,8 @@ var scan = function(model) {
       if (typeof value == "function") {
         if (value instanceof Model) {
           type = "orbs";
+        } else if (value.constructor.name == "AsyncFunction") {
+          type = "async";
         } else {
           type = "entry";
         }
@@ -592,16 +634,16 @@ var deepMerge = function(target, source) {
   }
   return result;
 };
-var MODEL_SELF = Symbol("m-self");
-var SYMBOL_ISMODEL = Symbol("orbz-ismodel");
-var Z_DEFS = Symbol("model-def");
 var shared_proto = {
   $: { value: function(cb, watchlist) {
     if (typeof cb == "function") {
-      return this[$Z].add_sub(cb, watchlist);
+      return this[$Z2].add_sub(cb, watchlist);
     } else if (typeof cb == "string") {
-      return this[$Z].add_link(cb, watchlist);
+      return this[$Z2].add_link(cb, watchlist);
     }
+  } },
+  $invalidate: { value: function(str) {
+    this[$Z2].inval(str);
   } },
   toString: { value: function() {
     return "orb toString";
@@ -616,18 +658,23 @@ var shared_proto = {
 Model.self = () => MODEL_SELF;
 Object.defineProperty(Model, Symbol.hasInstance, {
   value(o) {
-    return o && o[SYMBOL_ISMODEL];
+    return o && Object.hasOwn(o, Z_MODEL_IDS);
   }
 });
+var Orb = function(def) {
+  return Model(def)();
+};
 Object.defineProperty(Orb, Symbol.hasInstance, {
   value(o) {
-    return o && o[$Z] && o[$Z] instanceof OrbCore;
+    return o && o[$Z2] && o[$Z2] instanceof OrbCore;
   }
 });
 export {
+  svgFor,
   svg,
   render,
   raw,
+  htmlFor,
   html,
   css,
   classify,

@@ -1,5 +1,3 @@
-import { html, svg, render } from 'uhtml'
-
 function classify(n){
   return new Proxy({},{
     get(_,prop){
@@ -28,8 +26,6 @@ const raw = new Proxy(plain,{
 })
 const css = raw.css
 
-
 export {
-  html, svg, css, raw,
-  render, classify
+  css, raw, classify
 }

@@ -12,17 +12,30 @@
     "url": "git+https://github.com/m4r-sh/zilk.git"
   },
   "scripts": {
-    "build": "bun ./scripts/build.js"
+    "build": "bun ./scripts/build.js",
+    "dev": "bun --watch ./scripts/build.js"
   },
   "type": "module",
   "exports": {
     ".": {
-      "bun": "./build/ssr/index.js",
+      "bun": "./build/ssr/bun.js",
+      "node": "./build/ssr/node.js",
+      "browser": "./build/index.min.js",
       "import": "./build/index.js",
       "require": "./build/index.js"
+    },
+    "./hydrate": {
+      "browser": "./build/hydrate/index.js",
+      "import": "./build/hydrate/index.js"
+    },
+    "./router": {
+      "browser": "./build/router/index.js",
+      "import": "./build/router/index.js"
     }
   },
   "dependencies": {
+    "orbz": "^0.0.1",
+    "regexparam": "^2.0.1",
     "uhtml": "^4.1.20",
     "uhtml-ssr": "^0.9.1",
     "wicked-elements": "^3.1.2"
