@@ -36,7 +36,7 @@
   "dependencies": {
     "orbz": "^0.0.1",
     "regexparam": "^2.0.1",
-    "uhtml": "^4.1.20",
+    "uhtml": "^4.4.7",
     "uhtml-ssr": "^0.9.1",
     "wicked-elements": "^3.1.2"
   }

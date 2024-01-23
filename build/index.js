@@ -1,120 +1,5 @@
-// node_modules/uhtml/esm/utils.js
-var { isArray } = Array;
-var empty = [];
-var newRange = () => document.createRange();
-var set = (map, key, value) => {
-  map.set(key, value);
-  return value;
-};
-
-// node_modules/uhtml/esm/literals.js
-var cel = (c, e, l) => ({ c, e, l });
-var comment = () => ({ n: null });
-var detail = (v, u, t, n) => ({ v, u, t, n });
-var entry = (t, p, u, n = "") => ({ t, p, u, n });
-var cache = (s) => ({ s, t: null, n: null, d: empty });
-var parsed = (n, d) => ({ n, d });
-
-// node_modules/domconstants/esm/constants.js
-var ATTRIBUTE_NODE = 2;
-var TEXT_NODE = 3;
-var COMMENT_NODE = 8;
-var DOCUMENT_FRAGMENT_NODE = 11;
-
-// node_modules/custom-function/esm/factory.js
-/*! (c) Andrea Giammarchi - ISC */
-var { setPrototypeOf } = Object;
-var factory_default = (Class) => {
-  function Custom(target) {
-    return setPrototypeOf(target, new.target.prototype);
-  }
-  Custom.prototype = Class.prototype;
-  return Custom;
-};
-
-// node_modules/uhtml/esm/range.js
-var range;
-var range_default = (firstChild, lastChild, preserve) => {
-  if (!range)
-    range = newRange();
-  if (preserve)
-    range.setStartAfter(firstChild);
-  else
-    range.setStartBefore(firstChild);
-  range.setEndAfter(lastChild);
-  range.deleteContents();
-  return firstChild;
-};
-
-// node_modules/uhtml/esm/persistent-fragment.js
-var remove = ({ firstChild, lastChild }, preserve) => range_default(firstChild, lastChild, preserve);
-var checkType = false;
-var diffFragment = (node, operation) => checkType && node.nodeType === DOCUMENT_FRAGMENT_NODE ? 1 / operation < 0 ? operation ? remove(node, true) : node.lastChild : operation ? node.valueOf() : node.firstChild : node;
-
-class PersistentFragment extends factory_default(DocumentFragment) {
-  #nodes;
-  #length;
-  constructor(fragment) {
-    const _nodes = [...fragment.childNodes];
-    super(fragment);
-    this.#nodes = _nodes;
-    this.#length = _nodes.length;
-    checkType = true;
-  }
-  get firstChild() {
-    return this.#nodes[0];
-  }
-  get lastChild() {
-    return this.#nodes.at(-1);
-  }
-  get parentNode() {
-    return this.#nodes[0].parentNode;
-  }
-  remove() {
-    remove(this, false);
-  }
-  replaceWith(node) {
-    remove(this, true).replaceWith(node);
-  }
-  valueOf() {
-    if (this.childNodes.length !== this.#length)
-      this.append(...this.#nodes);
-    return this;
-  }
-}
-
-// node_modules/uhtml/esm/creator.js
-var find = (content, path) => path.reduceRight(childNodesIndex, content);
-var childNodesIndex = (node, i) => node.childNodes[i];
-var creator_default = (parse) => (template, values) => {
-  const { c: content, e: entries, l: length } = parse(template, values);
-  const root = content.cloneNode(true);
-  let current, prev, i = entries.length, details = i ? entries.slice(0) : empty;
-  while (i--) {
-    const { t: type, p: path, u: update, n: name } = entries[i];
-    const node = path === prev ? current : current = find(root, prev = path);
-    const callback = type === COMMENT_NODE ? update() : update;
-    details[i] = detail(callback(node, values[i], name, empty), callback, node, name);
-  }
-  return parsed(length === 1 ? root.firstChild : new PersistentFragment(root), details);
-};
-
-// node_modules/domconstants/esm/re.js
-var TEXT_ELEMENTS = /^(?:plaintext|script|style|textarea|title|xmp)$/i;
-var VOID_ELEMENTS = /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
-
-// node_modules/@webreflection/uparser/esm/index.js
-/*! (c) Andrea Giammarchi - ISC */
-var elements = /<([a-zA-Z0-9]+[a-zA-Z0-9:._-]*)([^>]*?)(\/?)>/g;
-var attributes = /([^\s\\>"'=]+)\s*=\s*(['"]?)\x01/g;
-var holes = /[\x01\x02]/g;
-var esm_default = (template, prefix, xml) => {
-  let i = 0;
-  return template.join("\x01").trim().replace(elements, (_, name, attrs, selfClosing) => `<${name}${attrs.replace(attributes, "\x02=$2$1").trimEnd()}${selfClosing ? xml || VOID_ELEMENTS.test(name) ? " /" : `></${name}` : ""}>`).replace(holes, (hole) => hole === "\x01" ? `<!--${prefix + i++}-->` : prefix + i++);
-};
-
 // node_modules/udomdiff/esm/index.js
-var esm_default2 = (parentNode, a, b, get, before) => {
+var esm_default = (parentNode, a, b, get, before) => {
   const bLength = b.length;
   let aEnd = a.length;
   let bEnd = bLength;
@@ -173,36 +58,108 @@ var esm_default2 = (parentNode, a, b, get, before) => {
   return b;
 };
 
-// node_modules/uhtml/esm/handler.js
-var hole = function(node, value) {
-  const n = this.n || (this.n = node);
-  switch (typeof value) {
-    case "string":
-    case "number":
-    case "boolean": {
-      if (n !== node)
-        n.replaceWith(this.n = node);
-      this.n.data = value;
-      break;
-    }
-    case "object":
-    case "undefined": {
-      if (value == null)
-        (this.n = node).data = "";
-      else
-        this.n = value.valueOf();
-      n.replaceWith(this.n);
-      break;
-    }
-  }
+// node_modules/uhtml/esm/utils.js
+var { isArray } = Array;
+var { getPrototypeOf, getOwnPropertyDescriptor } = Object;
+var SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+var empty = [];
+var newRange = () => document.createRange();
+var set = (map, key, value) => {
+  map.set(key, value);
   return value;
 };
-var setAttribute = (element, name, value) => {
-  element.setAttribute(name, value);
+var gPD = (ref, prop) => {
+  let desc;
+  do {
+    desc = getOwnPropertyDescriptor(ref, prop);
+  } while (!desc && (ref = getPrototypeOf(ref)));
+  return desc;
 };
-var removeAttribute = (element, name) => {
-  element.removeAttribute(name);
+
+// node_modules/domconstants/esm/constants.js
+var ELEMENT_NODE = 1;
+var COMMENT_NODE = 8;
+var DOCUMENT_FRAGMENT_NODE = 11;
+
+// node_modules/custom-function/esm/factory.js
+/*! (c) Andrea Giammarchi - ISC */
+var { setPrototypeOf } = Object;
+var factory_default = (Class) => {
+  function Custom(target) {
+    return setPrototypeOf(target, new.target.prototype);
+  }
+  Custom.prototype = Class.prototype;
+  return Custom;
 };
+
+// node_modules/uhtml/esm/range.js
+var range;
+var range_default = (firstChild, lastChild, preserve) => {
+  if (!range)
+    range = newRange();
+  if (preserve)
+    range.setStartAfter(firstChild);
+  else
+    range.setStartBefore(firstChild);
+  range.setEndAfter(lastChild);
+  range.deleteContents();
+  return firstChild;
+};
+
+// node_modules/uhtml/esm/persistent-fragment.js
+var remove = ({ firstChild, lastChild }, preserve) => range_default(firstChild, lastChild, preserve);
+var checkType = false;
+var diffFragment = (node, operation) => checkType && node.nodeType === DOCUMENT_FRAGMENT_NODE ? 1 / operation < 0 ? operation ? remove(node, true) : node.lastChild : operation ? node.valueOf() : node.firstChild : node;
+var comment = (value) => document.createComment(value);
+
+class PersistentFragment extends factory_default(DocumentFragment) {
+  #firstChild = comment("<>");
+  #lastChild = comment("</>");
+  #nodes = empty;
+  constructor(fragment) {
+    super(fragment);
+    this.replaceChildren(...[
+      this.#firstChild,
+      ...fragment.childNodes,
+      this.#lastChild
+    ]);
+    checkType = true;
+  }
+  get firstChild() {
+    return this.#firstChild;
+  }
+  get lastChild() {
+    return this.#lastChild;
+  }
+  get parentNode() {
+    return this.#firstChild.parentNode;
+  }
+  remove() {
+    remove(this, false);
+  }
+  replaceWith(node) {
+    remove(this, true).replaceWith(node);
+  }
+  valueOf() {
+    let { firstChild, lastChild, parentNode } = this;
+    if (parentNode === this) {
+      if (this.#nodes === empty)
+        this.#nodes = [...this.childNodes];
+    } else {
+      if (parentNode) {
+        this.#nodes = [firstChild];
+        while (firstChild !== lastChild)
+          this.#nodes.push(firstChild = firstChild.nextSibling);
+      }
+      this.replaceChildren(...this.#nodes);
+    }
+    return this;
+  }
+}
+
+// node_modules/uhtml/esm/handler.js
+var setAttribute = (element, name, value) => element.setAttribute(name, value);
+var removeAttribute = (element, name) => element.removeAttribute(name);
 var aria = (element, value) => {
   for (const key in value) {
     const $ = value[key];
@@ -214,7 +171,6 @@ var aria = (element, value) => {
   }
   return value;
 };
-var arrayComment = () => array;
 var listeners;
 var at = (element, value, name) => {
   name = name.slice(1);
@@ -230,7 +186,28 @@ var at = (element, value, name) => {
     element.addEventListener(name, ...current);
   return value;
 };
-var boundComment = () => hole.bind(comment());
+var holes = new WeakMap;
+var hole = (detail, value) => {
+  const { t: node, n: hole2 } = detail;
+  let nullish = false;
+  switch (typeof value) {
+    case "object":
+      if (value !== null) {
+        (hole2 || node).replaceWith(detail.n = value.valueOf());
+        break;
+      }
+    case "undefined":
+      nullish = true;
+    default:
+      node.data = nullish ? "" : value;
+      if (hole2) {
+        detail.n = null;
+        hole2.replaceWith(node);
+      }
+      break;
+  }
+  return value;
+};
 var className = (element, value) => maybeDirect(element, value, value == null ? "class" : "className");
 var data = (element, value) => {
   const { dataset } = element;
@@ -249,7 +226,22 @@ var ref = (element, value) => (typeof value === "function" ? value(element) : va
 var regular = (element, value, name) => (value == null ? removeAttribute(element, name) : setAttribute(element, name, value), value);
 var style = (element, value) => value == null ? maybeDirect(element, value, "style") : direct(element.style, value, "cssText");
 var toggle = (element, value, name) => (element.toggleAttribute(name.slice(1), value), value);
-var array = (node, value, _, prev) => value.length ? esm_default2(node.parentNode, prev, value, diffFragment, node) : (range_default(prev[0], prev.at(-1), false), empty);
+var array = (node, value, prev) => {
+  const { length } = value;
+  node.data = `[${length}]`;
+  if (length)
+    return esm_default(node.parentNode, prev, value, diffFragment, node);
+  switch (prev.length) {
+    case 1:
+      prev[0].remove();
+    case 0:
+      break;
+    default:
+      range_default(diffFragment(prev[0], 0), diffFragment(prev.at(-1), -0), false);
+      break;
+  }
+  return empty;
+};
 var attr = new Map([
   ["aria", aria],
   ["class", className],
@@ -266,10 +258,48 @@ var attribute = (element, name, svg) => {
     case "@":
       return at;
     default:
-      return svg || "ownerSVGElement" in element ? name === "ref" ? ref : regular : attr.get(name) || (name in element ? name.startsWith("on") ? direct : maybeDirect : regular);
+      return svg || "ownerSVGElement" in element ? name === "ref" ? ref : regular : attr.get(name) || (name in element ? name.startsWith("on") ? direct : gPD(element, name)?.set ? maybeDirect : regular : regular);
   }
 };
 var text = (element, value) => (element.textContent = value == null ? "" : value, value);
+
+// node_modules/uhtml/esm/literals.js
+var abc = (a, b, c) => ({ a, b, c });
+var bc = (b, c) => ({ b, c });
+var detail = (u, t, n, c) => ({ v: empty, u, t, n, c });
+var cache = () => abc(null, null, empty);
+
+// node_modules/uhtml/esm/creator.js
+var find = (content, path) => path.reduceRight(childNodesIndex, content);
+var childNodesIndex = (node, i) => node.childNodes[i];
+var creator_default = (parse) => (template, values) => {
+  const { a: fragment, b: entries, c: direct2 } = parse(template, values);
+  const root = document.importNode(fragment, true);
+  let details = empty;
+  if (entries !== empty) {
+    details = [];
+    for (let current, prev, i = 0;i < entries.length; i++) {
+      const { a: path, b: update, c: name } = entries[i];
+      const node = path === prev ? current : current = find(root, prev = path);
+      details[i] = detail(update, node, name, update === array ? [] : update === hole ? cache() : null);
+    }
+  }
+  return bc(direct2 ? root.firstChild : new PersistentFragment(root), details);
+};
+
+// node_modules/domconstants/esm/re.js
+var TEXT_ELEMENTS = /^(?:plaintext|script|style|textarea|title|xmp)$/i;
+var VOID_ELEMENTS = /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
+
+// node_modules/@webreflection/uparser/esm/index.js
+/*! (c) Andrea Giammarchi - ISC */
+var elements = /<([a-zA-Z0-9]+[a-zA-Z0-9:._-]*)([^>]*?)(\/?)>/g;
+var attributes = /([^\s\\>"'=]+)\s*=\s*(['"]?)\x01/g;
+var holes2 = /[\x01\x02]/g;
+var esm_default2 = (template, prefix, xml) => {
+  let i = 0;
+  return template.join("\x01").trim().replace(elements, (_, name, attrs, selfClosing) => `<${name}${attrs.replace(attributes, "\x02=$2$1").trimEnd()}${selfClosing ? xml || VOID_ELEMENTS.test(name) ? " /" : `></${name}` : ""}>`).replace(holes2, (hole2) => hole2 === "\x01" ? `<!--${prefix + i++}-->` : prefix + i++);
+};
 
 // node_modules/uhtml/esm/create-content.js
 var template = document.createElement("template");
@@ -278,7 +308,7 @@ var range4;
 var create_content_default = (text2, xml) => {
   if (xml) {
     if (!svg) {
-      svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg = document.createElementNS(SVG_NAMESPACE, "svg");
       range4 = newRange();
       range4.selectNodeContents(svg);
     }
@@ -300,25 +330,24 @@ var createPath = (node) => {
   }
   return path;
 };
+var textNode = () => document.createTextNode("");
 var resolve = (template2, values, xml) => {
-  const content = create_content_default(esm_default(template2, prefix, xml), xml);
+  const content = create_content_default(esm_default2(template2, prefix, xml), xml);
   const { length } = template2;
-  let asArray = false, entries = empty;
+  let entries = empty;
   if (length > 1) {
-    const tw = document.createTreeWalker(content, 1 | 128);
     const replace = [];
+    const tw = document.createTreeWalker(content, 1 | 128);
     let i = 0, search = `${prefix}${i++}`;
     entries = [];
     while (i < length) {
       const node = tw.nextNode();
       if (node.nodeType === COMMENT_NODE) {
         if (node.data === search) {
-          let update = isArray(values[i - 1]) ? arrayComment : boundComment;
-          if (update === boundComment)
+          const update = isArray(values[i - 1]) ? array : hole;
+          if (update === hole)
             replace.push(node);
-          else
-            asArray = true;
-          entries.push(entry(COMMENT_NODE, createPath(node), update));
+          entries.push(abc(createPath(node), update, null));
           search = `${prefix}${i++}`;
         }
       } else {
@@ -327,21 +356,28 @@ var resolve = (template2, values, xml) => {
           if (!path)
             path = createPath(node);
           const name = node.getAttribute(search);
-          entries.push(entry(ATTRIBUTE_NODE, path, attribute(node, name, xml), name));
+          entries.push(abc(path, attribute(node, name, xml), name));
           removeAttribute(node, search);
           search = `${prefix}${i++}`;
         }
-        if (TEXT_ELEMENTS.test(node.localName) && node.textContent.trim() === `<!--${search}-->`) {
-          entries.push(entry(TEXT_NODE, path || createPath(node), text));
+        if (!xml && TEXT_ELEMENTS.test(node.localName) && node.textContent.trim() === `<!--${search}-->`) {
+          entries.push(abc(path || createPath(node), text, null));
           search = `${prefix}${i++}`;
         }
       }
     }
     for (i = 0;i < replace.length; i++)
-      replace[i].replaceWith(document.createTextNode(""));
+      replace[i].replaceWith(textNode());
   }
-  const l = content.childNodes.length;
-  return set(cache2, template2, cel(content, entries, l === 1 && asArray ? 0 : l));
+  const { childNodes } = content;
+  let { length: len } = childNodes;
+  if (len < 1) {
+    len = 1;
+    content.appendChild(textNode());
+  } else if (len === 1 && length !== 1 && childNodes[0].nodeType !== ELEMENT_NODE) {
+    len = 0;
+  }
+  return set(cache2, template2, abc(content, entries, len === 1));
 };
 var cache2 = new WeakMap;
 var prefix = "is\xB5";
@@ -350,43 +386,45 @@ var parser_default = (xml) => (template2, values) => cache2.get(template2) || re
 // node_modules/uhtml/esm/rabbit.js
 var parseHTML = creator_default(parser_default(false));
 var parseSVG = creator_default(parser_default(true));
-var unroll = (cache3, { s: svg2, t: template2, v: values }) => {
-  if (values.length && cache3.s === empty)
-    cache3.s = [];
-  const length = unrollValues(cache3, values);
-  if (cache3.t !== template2) {
-    const { n: node, d: details } = (svg2 ? parseSVG : parseHTML)(template2, values);
-    cache3.t = template2;
-    cache3.n = node;
-    cache3.d = details;
-  } else {
-    const { d: details } = cache3;
-    for (let i = 0;i < length; i++) {
-      const value = values[i];
-      const detail2 = details[i];
-      const { v: previous } = detail2;
-      if (value !== previous) {
-        const { u: update, t: target, n: name } = detail2;
-        detail2.v = update(target, value, name, previous);
-      }
+var unroll = (info, { s, t, v }) => {
+  if (info.a !== t) {
+    const { b, c } = (s ? parseSVG : parseHTML)(t, v);
+    info.a = t;
+    info.b = b;
+    info.c = c;
+  }
+  for (let { c } = info, i = 0;i < c.length; i++) {
+    const value = v[i];
+    const detail2 = c[i];
+    switch (detail2.u) {
+      case array:
+        detail2.v = array(detail2.t, unrollValues(detail2.c, value), detail2.v);
+        break;
+      case hole:
+        const current = value instanceof Hole ? unroll(detail2.c || (detail2.c = cache()), value) : (detail2.c = null, value);
+        if (current !== detail2.v)
+          detail2.v = hole(detail2, current);
+        break;
+      default:
+        if (value !== detail2.v)
+          detail2.v = detail2.u(detail2.t, value, detail2.n, detail2.v);
+        break;
     }
   }
-  return cache3.n;
+  return info.b;
 };
-var unrollValues = ({ s: stack }, values) => {
-  const { length } = values;
-  for (let i = 0;i < length; i++) {
-    const hole2 = values[i];
-    if (hole2 instanceof Hole)
-      values[i] = unroll(stack[i] || (stack[i] = cache(empty)), hole2);
-    else if (isArray(hole2))
-      unrollValues(stack[i] || (stack[i] = cache([])), hole2);
+var unrollValues = (stack, values) => {
+  let i = 0, { length } = values;
+  if (length < stack.length)
+    stack.splice(length);
+  for (;i < length; i++) {
+    const value = values[i];
+    if (value instanceof Hole)
+      values[i] = unroll(stack[i] || (stack[i] = cache()), value);
     else
       stack[i] = null;
   }
-  if (length < stack.length)
-    stack.splice(length);
-  return length;
+  return values;
 };
 
 class Hole {
@@ -395,9 +433,12 @@ class Hole {
     this.t = template2;
     this.v = values;
   }
+  toDOM(info = cache()) {
+    return unroll(info, this);
+  }
 }
 
-// node_modules/uhtml/esm/render-hole.js
+// node_modules/uhtml/esm/render/hole.js
 var known = new WeakMap;
 
 // node_modules/uhtml/esm/index.js
@@ -406,26 +447,30 @@ var tag = (svg2) => (template2, ...values) => new Hole(svg2, template2, values);
 var html = tag(false);
 var svg2 = tag(true);
 
-// node_modules/uhtml/esm/render-keyed.js
+// node_modules/uhtml/esm/render/shared.js
 var known2 = new WeakMap;
-var render_keyed_default = (where, what) => {
-  const info = known2.get(where) || set(known2, where, cache(empty));
-  const hole2 = typeof what === "function" ? what() : what;
-  const { n } = info;
-  const node = hole2 instanceof Hole ? unroll(info, hole2) : hole2;
-  if (n !== node)
-    where.replaceChildren(info.n = node);
+var shared_default = (where, what, check) => {
+  const info = known2.get(where) || set(known2, where, cache());
+  const { b } = info;
+  const hole3 = check && typeof what === "function" ? what() : what;
+  const node = hole3 instanceof Hole ? hole3.toDOM(info) : hole3;
+  if (b !== node)
+    where.replaceChildren((info.b = node).valueOf());
   return where;
 };
 
+// node_modules/uhtml/esm/render/keyed.js
+var keyed_default = (where, what) => shared_default(where, what, true);
+
 // node_modules/uhtml/esm/keyed.js
-var keyed = new WeakMap;
+/*! (c) Andrea Giammarchi - MIT */
+var keyed2 = new WeakMap;
 var createRef = (svg3) => (ref2, key) => {
   function tag2(template2, ...values) {
-    return unroll(this, new Hole(svg3, template2, values));
+    return new Hole(svg3, template2, values).toDOM(this);
   }
-  const memo = keyed.get(ref2) || set(keyed, ref2, new Map);
-  return memo.get(key) || set(memo, key, tag2.bind(cache(empty)));
+  const memo = keyed2.get(ref2) || set(keyed2, ref2, new Map);
+  return memo.get(key) || set(memo, key, tag2.bind(cache()));
 };
 var htmlFor = createRef(false);
 var svgFor = createRef(true);
@@ -868,7 +913,7 @@ Object.defineProperty(Orb, Symbol.hasInstance, {
 export {
   svgFor,
   svg2 as svg,
-  render_keyed_default as render,
+  keyed_default as render,
   raw,
   htmlFor,
   html,
