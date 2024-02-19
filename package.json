@@ -20,6 +20,7 @@
     ".": {
       "bun": "./build/ssr/bun.js",
       "node": "./build/ssr/node.js",
+      "worker": "./build/ssr/node.js",
       "browser": "./build/index.min.js",
       "import": "./build/index.js",
       "require": "./build/index.js"
