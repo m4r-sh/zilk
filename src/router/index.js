@@ -71,7 +71,7 @@ function navaid(base, on404) {
 		function click(e) {
 			var x = e.target.closest('a'), y = x && x.getAttribute('href');
 			if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || e.button || e.defaultPrevented) return;
-			if (!y || x.target || x.host !== location.host || y[0] == '#' || x.getAttribute('download')) return;
+			if (!y || x.target || x.host !== location.host || y[0] == '#' || (typeof x.getAttribute('download') == 'string')) return;
 			if (y[0] != '/' || rgx.test(y)) {
 				e.preventDefault();
 				$.route(y);
