@@ -35,7 +35,7 @@
     }
   },
   "dependencies": {
-    "orbz": "^0.0.1",
+    "orbz": "^0.1.0",
     "regexparam": "^2.0.1",
     "uhtml": "^4.4.7",
     "uhtml-ssr": "^0.9.1",
