@@ -18,11 +18,11 @@ It's a developer-friendly integration of core abstractions; it's not a new primi
 
 It's split into two libraries:
 
-1. `zilk` (runtime):
+`zilk` (runtime):
   - **UI**: template literal rendering (powered by `uhtml`) & class-based event handlers (powered by `wicked-elements`)
   - **Data**: reactive objects (powered by `orbz`)
   - **Flows**: iterative user prompts (coming soon)
-2. `zilker` (build tool):
+`zilker` (build tool):
   - File-based: Intuitive project organization
   - Powered by Bun: Fast by default
   - Plugin-friendly: Custom dev experience and build settings
