@@ -19,13 +19,108 @@ It's a developer-friendly integration of a few core abstractions; it's not a new
 Runtime (`zilk`):
 - **UI**: template literal rendering (powered by `uhtml`)
 - **Data**: reactive objects (powered by `orbz`)
-- **Flows**: iterative transforms (coming soon)
-- Isomorphic: runs in browsers, Bun, Node.js, workers
+- **Flows**: iterative user prompts (coming soon)
 
 Build time (`zilker`):
 - File-based: Intuitive project organization
 - Powered by Bun: Fast by default
 - Plugin-friendly: Tailored dev experience and build settings
+
+---
+
+# Usage
+
+### Example View Component
+
+1. Render function (HTML)
+2. handlers (JS)
+3. style (CSS)
+
+> At build time, each export is handled differently. All handlers are bundled into a hydration script, all styles are bundled into a CSS stylesheet, and the render functions are bundled with the browser-side router. Server-side rendering only requires the render function, which is the default export.
+
+```js
+// views/Example.js
+import { html, css, classify } from 'zilk'
+
+let { CONTAINER, TITLE, BUTTON } = classify('Example')
+
+// 1. Render function (used for SSR and in-browser rendering)
+export default ({
+  title="Default Title",
+  btn_href="https://github.com/m4r-sh/zilk",
+  btn_label="Zilk Docs"
+}={}) => html`
+  <div class=${CONTAINER}>
+    <h1 class=${TITLE}>${title}</h1>
+    <a class=${BUTTON} href=${btn_href}>
+      <span class=${BUTTON.LABEL}>
+        ${btn_label}
+      </span>
+    </a>
+  </div>
+`
+
+// 2. Class-based event handlers, auto-attached on browser
+export let handlers = {
+  [BUTTON]: {
+    init(){
+      console.log('Button initialized')
+    },
+    onmouseover(){
+      console.log('Button hover')
+    },
+    onclick(event){
+      console.log('Button click')
+    }
+  }
+}
+
+// 3. Class-based CSS styles - extracted at build time
+export let style = () => css`
+  .${CONTAINER}{
+    text-align: center;
+    width: 100%;
+    max-width: 40rem;
+    margin: 4rem auto;
+  }
+  .${TITLE}{
+    font-size: 3rem;
+    color: #555;
+  }
+  .${BUTTON}{
+    padding: 1rem 0.5rem;
+    background: #000;
+  }
+  .${BUTTON.LABEL}{
+    color: #fff;
+  }
+`
+
+```
+
+### Example Page
+
+```js
+// pages/index.js
+import { html } from 'zilk'
+import Example from '../views/Example.js'
+
+// meta export used by in-browser router & SSR _document template
+export let meta = {
+  title: 'Homepage'
+}
+
+// default export is rendered within the slot in _document
+export default () => html`
+  <section>
+    ${Example({
+      title: "hello world",
+      btn_href: "/hey",
+      btn_label: "Hey!"
+    })}
+  </section>
+`
+```
 
 ---
 
@@ -38,6 +133,7 @@ Build time (`zilker`):
 Tagged template literals to render HTML and SVG content. See `uhtml` for more details.
 
 **Browsers**: Exports from `uhtml`
+
 **Bun/Node.js/Workers**: Exports from `uhtml/dom`
 
 ### css
@@ -46,13 +142,14 @@ Tagged template literal for rendering CSS. Doesn't transform the string, but it 
 
 ### raw
 
-Tagged template literal for arbitrary strings. It also provides proxied access to itself to self-document the content type. `raw.xml\`\``, `raw.md\`\``, etc
+Tagged template literal for arbitrary strings. It also provides proxied access to itself to self-document the content type. `raw.xml`,`raw.md`, etc
 
 ### render(where, what)
 
 Render `html` and `svg` templates to a DOM. Optimizations are done by `uhtml` under the hood to maximize performance.
 
 **Browsers**: `where` should be a DOM element.
+
 **Bun/Node.js/Workers**: `where` should be a mocked DOM element. Use `Document` to accomplish this. `Document` is only exported to the server-side runtime.
 
 ### classify(id)
