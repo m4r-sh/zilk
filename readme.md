@@ -143,6 +143,7 @@ export const Counter({
     return count * multiplier
   } 
 })
+```
 
 ---
 
