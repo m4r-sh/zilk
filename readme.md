@@ -14,23 +14,24 @@ zilk is an attempt to reduce the complexity of web development tooling to its si
 
 Like spider silk, it should be flexible, almost invisible, and structurally sound.
 
-It's a developer-friendly integration of a few core abstractions; it's not a new primitive.
+It's a developer-friendly integration of core abstractions; it's not a new primitive.
 
-Runtime (`zilk`):
-- **UI**: template literal rendering (powered by `uhtml`)
-- **Data**: reactive objects (powered by `orbz`)
-- **Flows**: iterative user prompts (coming soon)
+It's split into two libraries:
 
-Build time (`zilker`):
-- File-based: Intuitive project organization
-- Powered by Bun: Fast by default
-- Plugin-friendly: Tailored dev experience and build settings
+1. `zilk` (runtime):
+  - **UI**: template literal rendering (powered by `uhtml`) & class-based event handlers (powered by `wicked-elements`)
+  - **Data**: reactive objects (powered by `orbz`)
+  - **Flows**: iterative user prompts (coming soon)
+2. `zilker` (build tool):
+  - File-based: Intuitive project organization
+  - Powered by Bun: Fast by default
+  - Plugin-friendly: Custom dev experience and build settings
 
 ---
 
 # Usage
 
-### Example View Component
+### Example UI Component
 
 1. Render function (HTML)
 2. handlers (JS)
@@ -122,6 +123,27 @@ export default () => html`
 `
 ```
 
+### Example Model
+
+```js
+// models/index.js
+import { Model } from 'zilk'
+
+export const Counter({
+  count: 0,
+  multiplier: 1,
+  inc(){
+    this.count++
+  },
+  dec(){
+    this.count--
+  },
+  get total(){
+    let { count, multiplier } = this
+    return count * multiplier
+  } 
+})
+
 ---
 
 # API
@@ -185,14 +207,8 @@ Docs coming soon
 
 ---
 
-# Examples
-
-Coming soon
-
----
-
 # Credits
 
-The performance of `zilk` is largely due to @WebReflection's incredible work on `uhtml`, `wicked-elements`, and other top-tier JS libraries. He's a JavaScript master and understands the nitty-gritty details of browser performance.
+The performance of `zilk` is largely due to @WebReflection's incredible work on `uhtml`, `wicked-elements`, and other top-tier JS libraries. He's a JavaScript legend.
 
 The developer experience is inspired by Next.js, Svelte, Astro, and other great tools I've used over the years. The JavaScript ecosystem is bustling with innovation, but the overwhelming complexity makes it difficult to leverage these tools without getting stuck.
