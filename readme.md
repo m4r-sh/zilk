@@ -10,7 +10,7 @@ lightweight & flexible web architecture
 
 # Overview
 
-zilk is an attempt to reduce the complexity of web development tooling to its simplest form without sacrificing freedom.
+zilk is an attempt to reduce the complexity of web development without sacrificing freedom.
 
 Like spider silk, it should be flexible, almost invisible, and structurally sound.
 
@@ -18,10 +18,9 @@ It's a developer-friendly integration of core abstractions; it's not a new primi
 
 It's split into two libraries:
 
-`zilk` (runtime):
+`zilk` (isomorphic runtime):
   - **UI**: template literal rendering (powered by `uhtml`) & class-based event handlers (powered by `wicked-elements`)
   - **Data**: reactive objects (powered by `orbz`)
-  - **Flows**: iterative user prompts (coming soon)
 `zilker` (build tool):
   - File-based: Intuitive project organization
   - Powered by Bun: Fast by default
@@ -99,31 +98,9 @@ export let style = () => css`
 
 ```
 
-### Example Page
-
-```js
-// pages/index.js
-import { html } from 'zilk'
-import Example from '../views/Example.js'
-
-// meta export used by in-browser router & SSR _document template
-export let meta = {
-  title: 'Homepage'
-}
-
-// default export is rendered within the slot in _document
-export default () => html`
-  <section>
-    ${Example({
-      title: "hello world",
-      btn_href: "/hey",
-      btn_label: "Hey!"
-    })}
-  </section>
-`
-```
-
 ### Example Model
+
+> Models are specialized prototypes that allow for reactivity with minimal overhead. They're like classes, but defined by object literals. Derived values (marked by `get` prefixes) are only updated when their accessed values change (and only if they're being observed). Effects keep track of accessed properties, and the effect is re-run when any of those properties update. Updates are batched intelligently, so cascading updates don't cause duplicated effects.
 
 ```js
 // models/index.js
