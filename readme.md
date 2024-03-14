@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://bun.sh"><img src="https://raw.githubusercontent.com/m4r-sh/zilk/main/docs/zilk-sticker.png" alt="Logo" height=80></a>
+  <img src="https://raw.githubusercontent.com/m4r-sh/zilk/main/docs/zilk-sticker.png" alt="Logo" height=80>
 </p>
 <h1 align="center">zilk</h1>
 <h3 align="center">light & flexible web framework</h3>
