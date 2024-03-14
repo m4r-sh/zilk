@@ -1,8 +1,8 @@
+![zilk web](./docs/zilk-wide.jpg)
+
 # zilk
 
 light & flexible web framework
-
-![zilk web](./docs/zilk-wide.png)
 
 ---
 
