@@ -6,8 +6,8 @@
 
 <p align="center">
 <a href="https://bundlephobia.com/package/zilk" target="_new"><img height=20 src="https://img.shields.io/bundlephobia/minzip/zilk" /></a>
-<a href="https://www.npmjs.com/package/zilk" target="_new"><img height=20 src="https://img.shields.io/npm/v/zilk
-" /></a>
+<a href="https://www.npmjs.com/package/zilk" target="_new"><img height=20 src="https://img.shields.io/npm/v/zilk" /></a>
+</p>
 
 
 ---
