@@ -1,16 +1,37 @@
 import {parse} from 'regexparam';
 
-const router = navaid()
-let root = null
+// Code is mostly taken from @lukeed/navaid
+// Slight changes were made 
+
+let router
+let root_el = null
+let is_setup = false
+
+export function setup({
+	on404 = (uri)=>{},
+	root = null,
+	callback = ()=>{}
+}){
+	if(!is_setup){
+		if(!root){
+			let main = document.getElementsByTagName('main')[0];
+			root = main ? main : document.body
+		}
+		router = navaid('',on404)
+		root_el = root
+		is_setup = true
+		router.listen()
+	} else {
+		throw 'zilk router already setup'
+	}
+}
 
 export function register(pattern,meta,render){
-  if(!root){
-		let main = document.getElementsByTagName('main')[0];
-    root = main ? main : document.body
-    router.listen()
-  }
+	if(!is_setup){
+		setup()
+	}
   let cb = () => {
-		render(root)
+		render(root_el)
     window.scrollTo(0,0)
   }
   router.on(pattern, cb)

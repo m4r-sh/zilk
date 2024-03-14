@@ -241,13 +241,6 @@ var normalize = (o) => ({
   },
   init() {
     this.el = this.element;
-    for (let k in this.element.dataset) {
-      if (k.startsWith("z") && k[1].toUpperCase() == k[1]) {
-        let key = k[1].toLowerCase() + k.toString(2);
-        let val = this.element.dataset[k];
-        this[key] = "test";
-      }
-    }
     o.init.apply(this, []);
   }
 });

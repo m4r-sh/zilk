@@ -1,6 +1,6 @@
 # zilk
 
-lightweight & flexible web architecture
+light & flexible web framework
 
 ---
 
@@ -10,21 +10,22 @@ lightweight & flexible web architecture
 
 # Overview
 
-zilk is an attempt to reduce the complexity of web development without sacrificing freedom.
-
-Like spider silk, it should be flexible, almost invisible, and structurally sound.
-
-It's a developer-friendly integration of core abstractions; it's not a new primitive.
+zilk is an attempt to simplify web development without sacrificing freedom. Like spider silk, it should be flexible, almost invisible, and structurally sound. It's a developer-friendly integration of core abstractions; it's not a new primitive.
 
 It's split into two libraries:
 
-`zilk` (isomorphic runtime):
+## `zilk` (runtime)
   - **UI**: template literal rendering (powered by `uhtml`) & class-based event handlers (powered by `wicked-elements`)
   - **Data**: reactive objects (powered by `orbz`)
-`zilker` (build tool):
-  - File-based: Intuitive project organization
-  - Powered by Bun: Fast by default
-  - Plugin-friendly: Custom dev experience and build settings
+
+[zilk API docs](https://github.com/m4r-sh/zilk/tree/main/docs)
+
+## `zilker` (build tool):
+  - **File-based**: Intuitive project organization
+  - **Powered by [Bun](https://bun.sh/)**: Fast by default
+  - **Plugin-friendly**: Custom dev experience and build settings
+
+[zilker GitHub page](https://github.com/m4r-sh/zilker)
 
 ---
 
@@ -124,69 +125,10 @@ export const Counter({
 
 ---
 
-# API
-
-## `zilk`
-
-### html, svg
-
-Tagged template literals to render HTML and SVG content. See `uhtml` for more details.
-
-**Browsers**: Exports from `uhtml`
-
-**Bun/Node.js/Workers**: Exports from `uhtml/dom`
-
-### css
-
-Tagged template literal for rendering CSS. Doesn't transform the string, but it allows for syntax highlighting.
-
-### raw
-
-Tagged template literal for arbitrary strings. It also provides proxied access to itself to self-document the content type. `raw.xml`,`raw.md`, etc
-
-### render(where, what)
-
-Render `html` and `svg` templates to a DOM. Optimizations are done by `uhtml` under the hood to maximize performance.
-
-**Browsers**: `where` should be a DOM element.
-
-**Bun/Node.js/Workers**: `where` should be a mocked DOM element. Use `Document` to accomplish this. `Document` is only exported to the server-side runtime.
-
-### classify(id)
-
-*Returns*: specialized string proxy that outputs class names to avoid name-clashing
-
-Classify should be called once per UI component file, and the id should be unique for the project. 
-
-```js
-import { classify } from 'zilk'
-
-let { CONTAINER, BUTTON } = classify('Example')
-
-console.log(`${CONTAINER} ${BUTTON} ${BUTTON.LABEL}`)
-// ~> "Example__CONTAINER Example__BUTTON Example__BUTTON__LABEL"
-```
-
-### Model(definition)
-
-*Returns*: Constructor that produces `Orbs` with defined prototype. See `orbz` for more details.
-
-### Orb(definition)
-
-*Returns*: One-off reactive object based on the defined prototype. See `orbz` for more details.
-
-## `zilk/hydrate`
-
-Docs coming soon
-
-## `zilk/router`
-
-Docs coming soon
-
----
-
 # Credits
 
-The performance of `zilk` is largely due to @WebReflection's incredible work on `uhtml`, `wicked-elements`, and other top-tier JS libraries. He's a JavaScript legend.
+The performance of `zilk` is largely due to [@WebReflection's](https://github.com/WebReflection/) incredible work on [`uhtml`](https://github.com/WebReflection/uhtml), [`wicked-elements`](https://github.com/WebReflection/wicked-elements), and other top-tier JS libraries. He's a JavaScript legend. 
+
+Credit to [navaid](https://github.com/lukeed/navaid/) by [@lukeed](https://github.com/lukeed) for simple browser routing logic.
 
 The developer experience is inspired by Next.js, Svelte, Astro, and other great tools I've used over the years. The JavaScript ecosystem is bustling with innovation, but the overwhelming complexity makes it difficult to leverage these tools without getting stuck.

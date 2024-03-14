@@ -27,14 +27,32 @@ function parse(str, loose) {
 }
 
 // src/router/index.js
-function register(pattern, meta, render) {
-  if (!root) {
-    let main = document.getElementsByTagName("main")[0];
-    root = main ? main : document.body;
+function setup({
+  on404 = (uri) => {
+  },
+  root = null,
+  callback = () => {
+  }
+}) {
+  if (!is_setup) {
+    if (!root) {
+      let main = document.getElementsByTagName("main")[0];
+      root = main ? main : document.body;
+    }
+    router = navaid("", on404);
+    root_el = root;
+    is_setup = true;
     router.listen();
+  } else {
+    throw "zilk router already setup";
+  }
+}
+function register(pattern, meta, render) {
+  if (!is_setup) {
+    setup();
   }
   let cb = () => {
-    render(root);
+    render(root_el);
     window.scrollTo(0, 0);
   };
   router.on(pattern, cb);
@@ -123,8 +141,10 @@ var wrap = function(type, fn) {
     return dispatchEvent(ev);
   };
 };
-var router = navaid();
-var root = null;
+var router;
+var root_el = null;
+var is_setup = false;
 export {
+  setup,
   register
 };
