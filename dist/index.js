@@ -503,7 +503,7 @@ var raw = new Proxy(plain, {
   }
 });
 var css = raw.css;
-// /Users/marshall/code/stabilimentum/packages/zilk/node_modules/orbz/build/index.js
+// /Users/marshall/code/stabilimentum/packages/zilk/node_modules/orbz/dist/index.js
 var stringifyModel = function({ state, derived, entry, orbs, getset, async }) {
   let str = `{\n`;
   str += Object.keys(state).map((k) => `${k}:${parseValue(state[k], k)}`).join(",\n");
@@ -555,6 +555,89 @@ class OrbCore {
   #get_watchlists = {};
   #link_graph = {};
   #init_done = false;
+  #isLocal() {
+    return curr_get == this || !this.#init_done;
+  }
+  #watch_get(key) {
+    let len = get_stack.length;
+    if (len != 0) {
+      get_stack[len - 1].add(prefix2 + key);
+      prefix2 = "";
+    }
+  }
+  #get_stack_push() {
+    get_stack.push(new Set);
+  }
+  #get_stack_pop() {
+    let accessed = get_stack.splice(get_stack.length - 1, 1)[0];
+    return accessed;
+  }
+  #derived_value(key) {
+    if (this.#valid[key]) {
+      return this.#cache[key];
+    } else {
+      this.#get_stack_push();
+      let watchlist = this.#get_watchlists[key];
+      let v = this.#getters[key]();
+      let accessed = this.#get_stack_pop();
+      let [toRemove, toAdd, toSub] = diff_acc(watchlist, accessed);
+      toRemove.forEach((r_k) => {
+        this.#dep_graph[r_k].delete(key);
+        this.#get_watchlists[key].delete(r_k);
+      });
+      toAdd.forEach((a_k) => {
+        if (this.#dep_graph[a_k]) {
+          this.#dep_graph[a_k].add(key);
+        }
+        this.#get_watchlists[key].add(a_k);
+      });
+      toSub.forEach(([orb, acc_keys]) => {
+        this.#orbs[orb].$((o) => {
+        });
+      });
+      this.#cache[key] = v;
+      this.#valid[key] = true;
+      return v;
+    }
+  }
+  #invalidate(key, is_state = false) {
+    if (this.#init_done) {
+      if (is_state || this.#valid[key]) {
+        this.#changed.add(key);
+        if (!is_state) {
+          this.#valid[key] = false;
+        }
+        this.#dep_graph[key].forEach((k) => this.#invalidate(k));
+      }
+    }
+  }
+  #flush() {
+    if (entry_count == 0 && this.#changed.size > 0) {
+      this.#subs.forEach((watchlist, cb) => {
+        if (watchlist == null || [...watchlist].some((k) => this.#changed.has(k))) {
+          watchlist = new Set;
+          this.#get_stack_push();
+          cb(this.#this_orb);
+          let accessed = this.#get_stack_pop();
+          let [toRemove, toAdd, toSub] = diff_acc(watchlist, accessed);
+          toRemove.forEach((r_k) => {
+            watchlist.delete(r_k);
+          });
+          toAdd.forEach((a_k) => {
+            watchlist.add(a_k);
+          });
+          toSub.forEach(([orb_key, props]) => {
+          });
+          if (watchlist.size == 0) {
+            this.#subs.delete(cb);
+          } else {
+            this.#subs.set(cb, watchlist);
+          }
+        }
+      });
+      this.#changed.clear();
+    }
+  }
   constructor(defs, state, this_orb) {
     this.#this_orb = this_orb;
     this.#models = defs.orbs;
@@ -669,89 +752,6 @@ class OrbCore {
   get_orb(k) {
     this.#watch_get(k);
     return this.#orbs[k];
-  }
-  #isLocal() {
-    return curr_get == this || !this.#init_done;
-  }
-  #watch_get(key) {
-    let len = get_stack.length;
-    if (len != 0) {
-      get_stack[len - 1].add(prefix2 + key);
-      prefix2 = "";
-    }
-  }
-  #get_stack_push() {
-    get_stack.push(new Set);
-  }
-  #get_stack_pop() {
-    let accessed = get_stack.splice(get_stack.length - 1, 1)[0];
-    return accessed;
-  }
-  #derived_value(key) {
-    if (this.#valid[key]) {
-      return this.#cache[key];
-    } else {
-      this.#get_stack_push();
-      let watchlist = this.#get_watchlists[key];
-      let v = this.#getters[key]();
-      let accessed = this.#get_stack_pop();
-      let [toRemove, toAdd, toSub] = diff_acc(watchlist, accessed);
-      toRemove.forEach((r_k) => {
-        this.#dep_graph[r_k].delete(key);
-        this.#get_watchlists[key].delete(r_k);
-      });
-      toAdd.forEach((a_k) => {
-        if (this.#dep_graph[a_k]) {
-          this.#dep_graph[a_k].add(key);
-        }
-        this.#get_watchlists[key].add(a_k);
-      });
-      toSub.forEach(([orb, acc_keys]) => {
-        this.#orbs[orb].$((o) => {
-        });
-      });
-      this.#cache[key] = v;
-      this.#valid[key] = true;
-      return v;
-    }
-  }
-  #invalidate(key, is_state = false) {
-    if (this.#init_done) {
-      if (is_state || this.#valid[key]) {
-        this.#changed.add(key);
-        if (!is_state) {
-          this.#valid[key] = false;
-        }
-        this.#dep_graph[key].forEach((k) => this.#invalidate(k));
-      }
-    }
-  }
-  #flush() {
-    if (entry_count == 0 && this.#changed.size > 0) {
-      this.#subs.forEach((watchlist, cb) => {
-        if (watchlist == null || [...watchlist].some((k) => this.#changed.has(k))) {
-          watchlist = new Set;
-          this.#get_stack_push();
-          cb(this.#this_orb);
-          let accessed = this.#get_stack_pop();
-          let [toRemove, toAdd, toSub] = diff_acc(watchlist, accessed);
-          toRemove.forEach((r_k) => {
-            watchlist.delete(r_k);
-          });
-          toAdd.forEach((a_k) => {
-            watchlist.add(a_k);
-          });
-          toSub.forEach(([orb_key, props]) => {
-          });
-          if (watchlist.size == 0) {
-            this.#subs.delete(cb);
-          } else {
-            this.#subs.set(cb, watchlist);
-          }
-        }
-      });
-      this.#changed.clear();
-    }
   }
 }
 var $Z2 = Symbol("orb-core");

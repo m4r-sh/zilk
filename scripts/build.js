@@ -5,7 +5,7 @@ async function build(){
   // HYDRATION
   res = await Bun.build({
     entrypoints: ['./src/hydrate/index.js'],
-    outdir: './build/hydrate',
+    outdir: './dist/hydrate',
     target: 'browser',
     minify: false
   })
@@ -13,7 +13,7 @@ async function build(){
   // ROUTER
   res = await Bun.build({
     entrypoints: ['./src/router/index.js'],
-    outdir: './build/router',
+    outdir: './dist/router',
     target: 'browser',
     minify: false
   })
@@ -21,7 +21,7 @@ async function build(){
   // MAIN (BROWSER)
   res = await Bun.build({
     entrypoints: ['./src/browser.js'],
-    outdir: './build',
+    outdir: './dist',
     target: 'browser',
     naming: '[dir]/index.[ext]',
     minify: false
@@ -29,7 +29,7 @@ async function build(){
   if(!res.success) console.log(res)
   res = await Bun.build({
     entrypoints: ['./src/browser.js'],
-    outdir: './build',
+    outdir: './dist',
     target: 'browser',
     naming: '[dir]/index.min.[ext]',
     minify: true
@@ -38,7 +38,7 @@ async function build(){
   // MAIN (SERVER)
   res = await Bun.build({
     entrypoints: ['./src/server.js'],
-    outdir: './build/ssr',
+    outdir: './dist/ssr',
     target: 'node',
     naming: '[dir]/node.[ext]',
     minify: false
@@ -46,7 +46,7 @@ async function build(){
   if(!res.success) console.log(res)
   res = await Bun.build({
     entrypoints: ['./src/server.js'],
-    outdir: './build/ssr',
+    outdir: './dist/ssr',
     target: 'bun',
     naming: '[dir]/bun.[ext]',
     minify: false

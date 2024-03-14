@@ -15,23 +15,24 @@
     "build": "bun ./scripts/build.js",
     "dev": "bun --watch ./scripts/build.js"
   },
+  "module": "./dist/index.js",
   "type": "module",
   "exports": {
     ".": {
-      "bun": "./build/ssr/bun.js",
-      "node": "./build/ssr/node.js",
-      "worker": "./build/ssr/node.js",
-      "browser": "./build/index.min.js",
-      "import": "./build/index.js",
-      "require": "./build/index.js"
+      "bun": "./dist/ssr/bun.js",
+      "node": "./dist/ssr/node.js",
+      "worker": "./dist/ssr/node.js",
+      "browser": "./dist/index.min.js",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
     },
     "./hydrate": {
-      "browser": "./build/hydrate/index.js",
-      "import": "./build/hydrate/index.js"
+      "browser": "./dist/hydrate/index.js",
+      "import": "./dist/hydrate/index.js"
     },
     "./router": {
-      "browser": "./build/router/index.js",
-      "import": "./build/router/index.js"
+      "browser": "./dist/router/index.js",
+      "import": "./dist/router/index.js"
     }
   },
   "dependencies": {

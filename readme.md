@@ -17,17 +17,17 @@ zilk is an attempt to simplify web development without sacrificing freedom. Like
 It's split into two libraries:
 
 ## `zilk` (runtime)
-  - **UI**: template literal rendering (powered by `uhtml`) & class-based event handlers (powered by `wicked-elements`)
-  - **Data**: reactive objects (powered by `orbz`)
+  - **UI**: tagged template rendering (from [`uhtml`](https://github.com/WebReflection/uhtml)) & class-based event handlers (from [`wicked-elements`](https://github.com/WebReflection/wicked-elements))
+  - **Data**: reactive objects (from [`orbz`](https://github.com/m4r-sh/orbz))
 
-[zilk API docs](https://github.com/m4r-sh/zilk/tree/main/docs)
+[**Docs**](https://github.com/m4r-sh/zilk/tree/main/docs)
 
-## `zilker` (build tool):
+## `zilker` (build tool)
   - **File-based**: Intuitive project organization
   - **Powered by [Bun](https://bun.sh/)**: Fast by default
   - **Plugin-friendly**: Custom dev experience and build settings
 
-[zilker GitHub page](https://github.com/m4r-sh/zilker)
+[**Docs**](https://github.com/m4r-sh/zilker)
 
 ---
 
@@ -45,22 +45,20 @@ It's split into two libraries:
 // views/Example.js
 import { html, css, classify } from 'zilk'
 
-let { CONTAINER, TITLE, BUTTON } = classify('Example')
+let { TITLE, BUTTON } = classify('Example')
 
-// 1. Render function (used for SSR and in-browser rendering)
+// 1. Render function (used for SSR and browser rendering)
 export default ({
   title="Default Title",
   btn_href="https://github.com/m4r-sh/zilk",
   btn_label="Zilk Docs"
 }={}) => html`
-  <div class=${CONTAINER}>
-    <h1 class=${TITLE}>${title}</h1>
-    <a class=${BUTTON} href=${btn_href}>
-      <span class=${BUTTON.LABEL}>
-        ${btn_label}
-      </span>
-    </a>
-  </div>
+  <h1 class=${TITLE}>${title}</h1>
+  <a class=${BUTTON} href=${btn_href}>
+    <span class=${BUTTON.LABEL}>
+      ${btn_label}
+    </span>
+  </a>
 `
 
 // 2. Class-based event handlers, auto-attached on browser
@@ -68,9 +66,6 @@ export let handlers = {
   [BUTTON]: {
     init(){
       console.log('Button initialized')
-    },
-    onmouseover(){
-      console.log('Button hover')
     },
     onclick(event){
       console.log('Button click')
@@ -80,12 +75,6 @@ export let handlers = {
 
 // 3. Class-based CSS styles - extracted at build time
 export let style = () => css`
-  .${CONTAINER}{
-    text-align: center;
-    width: 100%;
-    max-width: 40rem;
-    margin: 4rem auto;
-  }
   .${TITLE}{
     font-size: 3rem;
     color: #555;
@@ -106,7 +95,7 @@ export let style = () => css`
 > Models are specialized prototypes that allow for reactivity with minimal overhead. They're like classes, but defined by object literals. Derived values (marked by `get` prefixes) are only updated when their accessed values change (and only if they're being observed). Effects keep track of accessed properties, and the effect is re-run when any of those properties update. Updates are batched intelligently, so cascading updates don't cause duplicated effects.
 
 ```js
-// models/index.js
+// models/Counter.js
 import { Model } from 'zilk'
 
 export const Counter({
