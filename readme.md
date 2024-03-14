@@ -2,6 +2,8 @@
 
 light & flexible web framework
 
+![zilk web](./docs/zilk-wide.png)
+
 ---
 
 > **Note**: zilk is actively being built out. It's functional and is used on [m4r.sh](https://m4r.sh) and [stabilimentum.com](https://stabilimentum.com), but it's not ready for public adoption yet. 
