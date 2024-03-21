@@ -11,7 +11,7 @@ export function setup({
 	on404 = (uri)=>{},
 	root = null,
 	callback = ()=>{}
-}){
+}={}){
 	if(!is_setup){
 		if(!root){
 			let main = document.getElementsByTagName('main')[0];

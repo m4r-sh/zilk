@@ -33,7 +33,7 @@ function setup({
   root = null,
   callback = () => {
   }
-}) {
+} = {}) {
   if (!is_setup) {
     if (!root) {
       let main = document.getElementsByTagName("main")[0];
