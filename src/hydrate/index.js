@@ -8,7 +8,9 @@ const normalize=o=>({
   $$(x){ return [...this.element.querySelectorAll(toQuery(x))] },
   init(){
     this.el = this.element
-    o.init.apply(this,[])
+    if(o.init && typeof o.init == 'function'){
+      o.init.apply(this,[])
+    }
   }
 })
 

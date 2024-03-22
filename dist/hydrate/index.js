@@ -241,7 +241,9 @@ var normalize = (o) => ({
   },
   init() {
     this.el = this.element;
-    o.init.apply(this, []);
+    if (o.init && typeof o.init == "function") {
+      o.init.apply(this, []);
+    }
   }
 });
 export {
