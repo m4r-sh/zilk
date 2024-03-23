@@ -35,8 +35,8 @@ export function register(pattern,meta,render){
     window.scrollTo(0,0)
   }
   router.on(pattern, cb)
-  if(pattern == 'index'){
-    router.on('/',cb)
+  if(pattern.endsWith('index')){
+    router.on(pattern.substring(0,pattern.lastIndexOf('index')), cb)
   }
 }
 
