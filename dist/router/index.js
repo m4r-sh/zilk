@@ -51,8 +51,8 @@ function register(pattern, meta, render) {
   if (!is_setup) {
     setup();
   }
-  let cb = () => {
-    render(root_el);
+  let cb = (params) => {
+    render(root_el, params);
     window.scrollTo(0, 0);
   };
   router.on(pattern, cb);
