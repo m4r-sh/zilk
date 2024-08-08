@@ -31,8 +31,28 @@ export function register(pattern,meta,render){
 		setup()
 	}
   let cb = (params) => {
+		let metadata = typeof meta == 'function' ? meta(params) : meta
+		if(metadata && typeof metadata == 'object'){
+			if(metadata.title){
+				document.title = metadata.title
+			}
+			if(metadata.favicon){
+				var links = document.querySelectorAll("link[rel~='icon']");
+				[...links].forEach(link => link.href = metadata.favicon)
+			}
+		}
 		render(root_el,params)
-    window.scrollTo(0,0)
+		if(location.hash && location.hash.length > 0){
+			const hash = location.hash.substring(1);
+			const hashed_element = document.getElementById(hash);
+			if (hashed_element) {
+				window.scrollTo({
+						top: hashed_element.offsetTop
+				});
+		}
+		} else {
+			window.scrollTo(0,0)
+		}
   }
   router.on(pattern, cb)
   if(pattern.endsWith('index')){
