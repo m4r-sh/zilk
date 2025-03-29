@@ -1,18 +1,10 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/m4r-sh/zilk/main/docs/zilk-sticker.png" alt="Logo" height=80>
-</p>
-<h1 align="center">zilk</h1>
-<h3 align="center">light & flexible web framework</h3>
+# zilk
 
-<p align="center">
-<a href="https://bundlephobia.com/package/zilk" target="_new"><img height=20 src="https://img.shields.io/bundlephobia/minzip/zilk" /></a>
-<a href="https://www.npmjs.com/package/zilk" target="_new"><img height=20 src="https://img.shields.io/npm/v/zilk" /></a>
-</p>
-
+light & flexible web framework
 
 ---
 
-> **Note**: zilk is actively being built out. It's functional and is used on [m4r.sh](https://m4r.sh) and [stabilimentum.com](https://stabilimentum.com), but it's not ready for public adoption yet. 
+> **Note**: zilk is actively being built out. It's functional and is used on [m4r.sh](https://m4r.sh) and [stabilimentum.com](https://stabilimentum.com), but it's not ready for public adoption. 
 
 ---
 
