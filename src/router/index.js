@@ -1,140 +1,199 @@
-import {parse} from 'regexparam';
+export function createRouter({ pages = {}, redirects = {} } = {}) {
+  // Route storage and lifecycle callbacks
+  const routes = [];
+  const listeners = {
+    onStart: [],
+    onBefore: [],
+    onReady: [],
+    onAfter: [],
+    onError: [],
+    onCancel: []
+  };
+  let transitionHandler = null;
+  let isRouting = false; // Tracks if a route is in progress
+  let canCancel = false; // Tracks if cancelation is still possible
 
-// Code is mostly taken from @lukeed/navaid
-// Slight changes were made 
-
-let router
-let root_el = null
-let is_setup = false
-
-export function setup({
-	on404 = (uri)=>{},
-	root = null,
-	callback = ()=>{}
-}={}){
-	if(!is_setup){
-		if(!root){
-			let main = document.getElementsByTagName('main')[0];
-			root = main ? main : document.body
-		}
-		router = navaid('',on404)
-		root_el = root
-		is_setup = true
-		router.listen()
-	} else {
-		throw 'zilk router already setup'
-	}
-}
-
-export function register(pattern,meta,render){
-	if(!is_setup){
-		setup()
-	}
-  let cb = (params) => {
-		let metadata = typeof meta == 'function' ? meta(params) : meta
-		if(metadata && typeof metadata == 'object'){
-			if(metadata.title){
-				document.title = metadata.title
-			}
-			if(metadata.favicon){
-				var links = document.querySelectorAll("link[rel~='icon']");
-				[...links].forEach(link => link.href = metadata.favicon)
-			}
-		}
-		render(root_el,params)
-		if(location.hash && location.hash.length > 0){
-			const hash = location.hash.substring(1);
-			const hashed_element = document.getElementById(hash);
-			if (hashed_element) {
-				window.scrollTo({
-						top: hashed_element.offsetTop
-				});
-		}
-		} else {
-			window.scrollTo(0,0)
-		}
+  // Register pages as routes with itty-router's pattern matching
+  for (const [pattern, handler] of Object.entries(pages)) {
+    const regex = RegExp(
+      '^' +
+      (('/' + pattern).replace(/\/+(\/|$)/g, '$1'))
+        .replace(/(\/?\.?):(\w+)\+/g, '($1(?<$2>*))')  // Greedy params
+        .replace(/(\/?\.?):(\w+)/g, '($1(?<$2>[^$1/]+?))') // Named params
+        .replace(/\./g, '\\.')                          // Escape dots
+        .replace(/(\/?)\*/g, '($1.*)?')                 // Wildcard
+      + '/*$'
+    );
+    routes.push({ regex, handler });
   }
-  router.on(pattern, cb)
-  if(pattern.endsWith('index')){
-    router.on(pattern.substring(0,pattern.lastIndexOf('index')), cb)
+
+  // Match a path against routes or redirects
+  function match(url) {
+    const { pathname, searchParams } = new URL(url, location.origin);
+    let path = pathname.replace(/\/+$/, '') || '/';
+
+    // Check redirects
+    if (redirects[path]) {
+      return { redirect: redirects[path] };
+    }
+
+    // Parse query params
+    const query = {};
+    for (let [k, v] of searchParams) {
+      query[k] = query[k] ? [].concat(query[k], v) : v;
+    }
+
+    // Match routes
+    for (const { regex, handler } of routes) {
+      const match = path.match(regex);
+      if (match) {
+        const params = match.groups || {};
+        return { handler, params, query };
+      }
+    }
+    return null;
   }
-}
 
-function navaid(base, on404) {
-	var rgx, curr, routes=[], $={};
+  // Trigger lifecycle callbacks
+  function trigger(event, arg) {
+    if (event === 'onBefore') {
+      // Check if any onBefore callback returns false
+      return listeners[event].every(cb => cb(arg) !== false);
+    }
+    listeners[event].forEach(cb => cb(arg));
+    return true; // Default to true for non-onBefore events
+  }
 
-	var fmt = $.format = function (uri) {
-		if (!uri) return uri;
-		uri = '/' + uri.replace(/^\/|\/$/g, '');
-		return rgx.test(uri) && uri.replace(rgx, '/');
-	}
+  // Perform routing with redirect depth tracking
+  async function route(uri, replace = false, redirectDepth = 0) {
+    console.log('route to ' + uri + ' : ' + replace + ' ' + redirectDepth)
+    const MAX_REDIRECT_DEPTH = 8;
+    uri = uri.replace(/\/+$/, '') || '/';
+    const currentPath = location.pathname.replace(/\/+$/, '') || '/';
 
-	base = '/' + (base || '').replace(/^\/|\/$/g, '');
-	rgx = base == '/' ? /^\/+/ : new RegExp('^\\' + base + '(?=\\/|$)\\/?', 'i');
+    if (uri === currentPath && !replace) return;
 
-	$.route = function (uri, replace) {
-		if (uri[0] == '/' && !rgx.test(uri)) uri = base + uri;
-		history[(uri === curr || replace ? 'replace' : 'push') + 'State'](uri, null, uri);
-	}
+    if (isRouting) {
+      console.warn('Route already in progress, ignoring:', uri);
+      return;
+    }
 
-	$.on = function (pat, fn) {
-		(pat = parse(pat)).fn = fn;
-		routes.push(pat);
-		return $;
-	}
+    isRouting = true;
+    canCancel = true;
+    trigger('onStart', uri);
 
-	$.run = function (uri) {
-		var i=0, params={}, arr, obj;
-		if (uri = fmt(uri || location.pathname)) {
-			uri = uri.match(/[^\?#]*/)[0];
-			for (curr = uri; i < routes.length; i++) {
-				if (arr = (obj=routes[i]).pattern.exec(uri)) {
-					for (i=0; i < obj.keys.length;) {
-						params[obj.keys[i]] = arr[++i] || null;
-					}
-					obj.fn(params); // todo loop?
-					return $;
-				}
-			}
-			if (on404) on404(uri);
-		}
-		return $;
-	}
+    const matchResult = match(location.origin + uri);
+    if (!matchResult) {
+      trigger('onError', new Error(`No route found for ${uri}`));
+      isRouting = false;
+      canCancel = false;
+      return;
+    }
 
-	$.listen = function (u) {
-		wrap('push');
-		wrap('replace');
+    if (matchResult.redirect) {
+      if (redirectDepth >= MAX_REDIRECT_DEPTH) {
+        trigger('onError', new Error(`Redirect depth exceeded (${MAX_REDIRECT_DEPTH}) at ${uri}`));
+        isRouting = false;
+        canCancel = false;
+        return;
+      }
+      console.log(matchResult, replace)
+      history[replace ? 'replaceState' : 'pushState']({}, '', matchResult.redirect);
+      isRouting = false; // Reset before recursive call
+      await route(matchResult.redirect, true, redirectDepth + 1);
+      return;
+    }
 
-		function run(e) {
-			$.run();
-		}
+    const { handler, params, query } = matchResult;
+    const req = { params, query };
 
-		function click(e) {
-			var x = e.target.closest('a'), y = x && x.getAttribute('href');
-			if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || e.button || e.defaultPrevented) return;
-			if (!y || x.target || x.host !== location.host || y[0] == '#' || (typeof x.getAttribute('download') == 'string')) return;
-			if (y[0] != '/' || rgx.test(y)) {
-				e.preventDefault();
-				$.route(y);
-			}
-		}
+    // Check onBefore; cancel if any return false
+    if (!trigger('onBefore', req)) {
+      trigger('onCancel', uri);
+      isRouting = false;
+      canCancel = false;
+      return;
+    }
 
-		addEventListener('popstate', run);
-		addEventListener('replacestate', run);
-		addEventListener('pushstate', run);
-		addEventListener('click', click);
+    try {
+      const result = await handler(req);
+      trigger('onReady', result);
 
-		$.unlisten = function () {
-			removeEventListener('popstate', run);
-			removeEventListener('replacestate', run);
-			removeEventListener('pushstate', run);
-			removeEventListener('click', click);
-		}
+      if (!canCancel) {
+        console.warn('Route canceled too late:', uri);
+      } else if (transitionHandler) {
+        canCancel = false; // No cancelation after this point
+        transitionHandler(result);
+        history[replace ? 'replaceState' : 'pushState']({}, '', uri);
+        trigger('onAfter', result);
+      } else {
+        console.warn('No transition handler set for route:', uri);
+      }
+    } catch (error) {
+      trigger('onError', error);
+    } finally {
+      isRouting = false;
+      canCancel = false;
+    }
+  }
 
-		return $;
-	}
+  // Click handler for navigation
+  function clickHandler(e) {
+    const link = e.target.closest('a');
+    if (!link) return;
+    const href = link.getAttribute('href');
+    if (!href || link.target || link.host !== location.host || href[0] === '#' || link.hasAttribute('download')) return;
+    if (href[0] === '/') {
+      e.preventDefault();
+      route(href);
+    }
+  }
 
-	return $;
+  // Subscribe to lifecycle events with unsubscribe
+  function subscribe(event) {
+    return (callback) => {
+      listeners[event].push(callback);
+      return () => {
+        listeners[event] = listeners[event].filter(cb => cb !== callback);
+      };
+    };
+  }
+
+  // Router API
+  const router = {
+    onStart: subscribe('onStart'),
+    onBefore: subscribe('onBefore'),
+    onReady: subscribe('onReady'),
+    onAfter: subscribe('onAfter'),
+    onError: subscribe('onError'),
+    onCancel: subscribe('onCancel'),
+    performTransition(callback) {
+      if (transitionHandler) {
+        throw new Error('performTransition can only be set once');
+      }
+      transitionHandler = callback;
+    },
+    cancel() {
+      if (!isRouting || !canCancel) {
+        console.warn('Cannot cancel: No active route or cancelation period has passed');
+        return;
+      }
+      trigger('onCancel', location.pathname);
+      isRouting = false;
+      canCancel = false;
+    }
+  };
+
+  // Take over routing
+  wrap('push');
+  wrap('replace');
+  addEventListener('popstate', () => route(location.pathname,true));
+  addEventListener('replacestate', () => route(location.pathname,true));
+  addEventListener('pushstate', () => route(location.pathname,true));
+  addEventListener('click', clickHandler);
+  // TODO: need?
+
+  return router;
 }
 
 function wrap(type, fn) {

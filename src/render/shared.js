@@ -8,24 +8,8 @@ function classify(n){
   })
 }
 
-const plain = function(t){
-  if(typeof t === 'string'){
-    return t;
-  }
-  for (var s = t[0], i = 1, l = arguments.length; i < l; i++)
-    s += arguments[i] + t[i];
-  return s;
-}
 
-const raw = new Proxy(plain,{
-  get(_,k){
-    let f = plain.bind(null)
-    f.lang = k
-    return f
-  }
-})
-const css = raw.css
 
 export {
-  css, raw, classify
+  classify
 }

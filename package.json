@@ -1,5 +1,5 @@
 {
-  "version": "0.1.1",
+  "version": "0.4.0",
   "name": "zilk",
   "description": "lightweight and flexible web framework",
   "author": {
@@ -38,7 +38,7 @@
   "dependencies": {
     "orbz": "^0.1.5",
     "regexparam": "^2.0.1",
-    "uhtml": "^4.4.7",
+    "uhtml": "^4.7.0",
     "uhtml-ssr": "^0.9.1",
     "wicked-elements": "^3.1.2"
   }

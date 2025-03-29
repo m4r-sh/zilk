@@ -96,30 +96,6 @@ export let style = () => css`
 
 ```
 
-### Example Model
-
-> Models are specialized prototypes that allow for reactivity with minimal overhead. They're like classes, but defined by object literals. Derived values (marked by `get` prefixes) are only updated when their accessed values change (and only if they're being observed). Effects keep track of accessed properties, and the effect is re-run when any of those properties update. Updates are batched intelligently, so cascading updates don't cause duplicated effects.
-
-```js
-// models/Counter.js
-import { Model } from 'zilk'
-
-export const Counter({
-  count: 0,
-  multiplier: 1,
-  inc(){
-    this.count++
-  },
-  dec(){
-    this.count--
-  },
-  get total(){
-    let { count, multiplier } = this
-    return count * multiplier
-  } 
-})
-```
-
 ---
 
 # Credits

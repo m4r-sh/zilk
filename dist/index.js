@@ -8,7 +8,7 @@ var esm_default = (parentNode, a, b, get, before) => {
   let map = null;
   while (aStart < aEnd || bStart < bEnd) {
     if (aEnd === aStart) {
-      const node = bEnd < bLength ? bStart ? get(b[bStart - 1], -0).nextSibling : get(b[bEnd - bStart], 0) : before;
+      const node = bEnd < bLength ? bStart ? get(b[bStart - 1], -0).nextSibling : get(b[bEnd], 0) : before;
       while (bStart < bEnd)
         parentNode.insertBefore(get(b[bStart++], 1), node);
     } else if (bEnd === bStart) {
@@ -24,8 +24,8 @@ var esm_default = (parentNode, a, b, get, before) => {
       aEnd--;
       bEnd--;
     } else if (a[aStart] === b[bEnd - 1] && b[bStart] === a[aEnd - 1]) {
-      const node = get(a[--aEnd], -1).nextSibling;
-      parentNode.insertBefore(get(b[bStart++], 1), get(a[aStart++], -1).nextSibling);
+      const node = get(a[--aEnd], -0).nextSibling;
+      parentNode.insertBefore(get(b[bStart++], 1), get(a[aStart++], -0).nextSibling);
       parentNode.insertBefore(get(b[--bEnd], 1), node);
       a[aEnd] = b[bEnd];
     } else {
@@ -75,6 +75,8 @@ var gPD = (ref, prop) => {
   } while (!desc && (ref = getPrototypeOf(ref)));
   return desc;
 };
+var find = (content, path) => path.reduceRight(childNodesIndex, content);
+var childNodesIndex = (node, i) => node.childNodes[i];
 
 // node_modules/domconstants/esm/constants.js
 var ELEMENT_NODE = 1;
@@ -82,7 +84,6 @@ var COMMENT_NODE = 8;
 var DOCUMENT_FRAGMENT_NODE = 11;
 
 // node_modules/custom-function/esm/factory.js
-/*! (c) Andrea Giammarchi - ISC */
 var { setPrototypeOf } = Object;
 var factory_default = (Class) => {
   function Custom(target) {
@@ -141,12 +142,13 @@ class PersistentFragment extends factory_default(DocumentFragment) {
     remove(this, true).replaceWith(node);
   }
   valueOf() {
-    let { firstChild, lastChild, parentNode } = this;
+    const { parentNode } = this;
     if (parentNode === this) {
       if (this.#nodes === empty)
         this.#nodes = [...this.childNodes];
     } else {
       if (parentNode) {
+        let { firstChild, lastChild } = this;
         this.#nodes = [firstChild];
         while (firstChild !== lastChild)
           this.#nodes.push(firstChild = firstChild.nextSibling);
@@ -270,8 +272,6 @@ var detail = (u, t, n, c) => ({ v: empty, u, t, n, c });
 var cache = () => abc(null, null, empty);
 
 // node_modules/uhtml/esm/creator.js
-var find = (content, path) => path.reduceRight(childNodesIndex, content);
-var childNodesIndex = (node, i) => node.childNodes[i];
 var creator_default = (parse) => (template, values) => {
   const { a: fragment, b: entries, c: direct2 } = parse(template, values);
   const root = document.importNode(fragment, true);
@@ -292,7 +292,6 @@ var TEXT_ELEMENTS = /^(?:plaintext|script|style|textarea|title|xmp)$/i;
 var VOID_ELEMENTS = /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
 
 // node_modules/@webreflection/uparser/esm/index.js
-/*! (c) Andrea Giammarchi - ISC */
 var elements = /<([a-zA-Z0-9]+[a-zA-Z0-9:._-]*)([^>]*?)(\/?)>/g;
 var attributes = /([^\s\\>"'=]+)\s*=\s*(['"]?)\x01/g;
 var holes2 = /[\x01\x02]/g;
@@ -304,15 +303,15 @@ var esm_default2 = (template, prefix, xml) => {
 // node_modules/uhtml/esm/create-content.js
 var template = document.createElement("template");
 var svg;
-var range4;
+var range2;
 var create_content_default = (text2, xml) => {
   if (xml) {
     if (!svg) {
       svg = document.createElementNS(SVG_NAMESPACE, "svg");
-      range4 = newRange();
-      range4.selectNodeContents(svg);
+      range2 = newRange();
+      range2.selectNodeContents(svg);
     }
-    return range4.createContextualFragment(text2);
+    return range2.createContextualFragment(text2);
   }
   template.innerHTML = text2;
   const { content } = template;
@@ -380,15 +379,15 @@ var resolve = (template2, values, xml) => {
   return set(cache2, template2, abc(content, entries, len === 1));
 };
 var cache2 = new WeakMap;
-var prefix = "is\xB5";
+var prefix = "isµ";
 var parser_default = (xml) => (template2, values) => cache2.get(template2) || resolve(template2, values, xml);
 
 // node_modules/uhtml/esm/rabbit.js
-var parseHTML = creator_default(parser_default(false));
-var parseSVG = creator_default(parser_default(true));
+var createHTML = creator_default(parser_default(false));
+var createSVG = creator_default(parser_default(true));
 var unroll = (info, { s, t, v }) => {
   if (info.a !== t) {
-    const { b, c } = (s ? parseSVG : parseHTML)(t, v);
+    const { b, c } = (s ? createSVG : createHTML)(t, v);
     info.a = t;
     info.b = b;
     info.c = c;
@@ -452,8 +451,8 @@ var known2 = new WeakMap;
 var shared_default = (where, what, check) => {
   const info = known2.get(where) || set(known2, where, cache());
   const { b } = info;
-  const hole3 = check && typeof what === "function" ? what() : what;
-  const node = hole3 instanceof Hole ? hole3.toDOM(info) : hole3;
+  const hole2 = check && typeof what === "function" ? what() : what;
+  const node = hole2 instanceof Hole ? hole2.toDOM(info) : hole2;
   if (b !== node)
     where.replaceChildren((info.b = node).valueOf());
   return where;
@@ -464,18 +463,19 @@ var keyed_default = (where, what) => shared_default(where, what, true);
 
 // node_modules/uhtml/esm/keyed.js
 /*! (c) Andrea Giammarchi - MIT */
-var keyed2 = new WeakMap;
+var keyed = new WeakMap;
 var createRef = (svg3) => (ref2, key) => {
   function tag2(template2, ...values) {
     return new Hole(svg3, template2, values).toDOM(this);
   }
-  const memo = keyed2.get(ref2) || set(keyed2, ref2, new Map);
+  const memo = keyed.get(ref2) || set(keyed, ref2, new Map);
   return memo.get(key) || set(memo, key, tag2.bind(cache()));
 };
 var htmlFor = createRef(false);
 var svgFor = createRef(true);
+
 // src/render/shared.js
-var classify = function(n) {
+function classify(n) {
   return new Proxy({}, {
     get(_, prop) {
       if (prop === Symbol.toPrimitive || prop === "toString") {
@@ -486,7 +486,9 @@ var classify = function(n) {
       return classify(n + "__" + prop.toString());
     }
   });
-};
+}
+
+// src/render/browser.js
 var plain = function(t) {
   if (typeof t === "string") {
     return t;
@@ -503,18 +505,7 @@ var raw = new Proxy(plain, {
   }
 });
 var css = raw.css;
-// /Users/marshall/code/stabilimentum/packages/zilk/node_modules/orbz/dist/index.js
-var stringifyModel = function({ state, derived, entry, orbs, getset, async }) {
-  let str = `{\n`;
-  str += Object.keys(state).map((k) => `${k}:${parseValue(state[k], k)}`).join(",\n");
-  str += ",\n";
-  str += Object.keys(derived).map((k) => `${derived[k]}`).join(",\n");
-  str += ",\n";
-  str += Object.keys(entry).map((k) => `${entry[k]}`).join(",\n");
-  str += ",\n";
-  str += "}";
-  return str;
-};
+// ../orbz/dist/index.js
 var diff_acc = function(before, after) {
   let toRemove = new Set([...before].filter((x) => !after.has(x)));
   let toAdd = new Set([...after].filter((x) => !before.has(x)));
@@ -592,8 +583,7 @@ class OrbCore {
         this.#get_watchlists[key].add(a_k);
       });
       toSub.forEach(([orb, acc_keys]) => {
-        this.#orbs[orb].$((o) => {
-        });
+        this.#orbs[orb].$((o) => {});
       });
       this.#cache[key] = v;
       this.#valid[key] = true;
@@ -626,8 +616,7 @@ class OrbCore {
           toAdd.forEach((a_k) => {
             watchlist.add(a_k);
           });
-          toSub.forEach(([orb_key, props]) => {
-          });
+          toSub.forEach(([orb_key, props]) => {});
           if (watchlist.size == 0) {
             this.#subs.delete(cb);
           } else {
@@ -902,6 +891,24 @@ var deepMerge = function(target, source) {
   }
   return result;
 };
+function stringifyModel({ state, derived, entry, orbs, getset, async }) {
+  let str = `{
+`;
+  str += Object.keys(state).map((k) => `${k}:${parseValue(state[k], k)}`).join(`,
+`);
+  str += `,
+`;
+  str += Object.keys(derived).map((k) => `${derived[k]}`).join(`,
+`);
+  str += `,
+`;
+  str += Object.keys(entry).map((k) => `${entry[k]}`).join(`,
+`);
+  str += `,
+`;
+  str += "}";
+  return str;
+}
 var shared_proto = {
   $: { value: function(cb, watchlist) {
     if (typeof cb == "function") {
@@ -929,8 +936,8 @@ Object.defineProperty(Model, "toString", {
   }
 });
 /*! (c) Andrea Giammarchi - ISC */
-var stringifyObject = (handler6) => "{" + Object.keys(handler6).map((key) => {
-  const { get, set: set2, value } = Object.getOwnPropertyDescriptor(handler6, key);
+var stringifyObject = (handler) => "{" + Object.keys(handler).map((key) => {
+  const { get, set: set2, value } = Object.getOwnPropertyDescriptor(handler, key);
   if (get && set2)
     key = get + "," + set2;
   else if (get)
@@ -968,5 +975,6 @@ export {
   css,
   classify,
   Orb,
-  Model
+  Model,
+  Hole
 };

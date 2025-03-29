@@ -14,7 +14,7 @@ const normalize=o=>({
   }
 })
 
-export function saturateAsync(locations){
+export function hydrateAsync(locations){
   for(let k in locations){
     defineAsync('.'+k, () => 
       locations[k]().then(mod => ({
@@ -24,8 +24,10 @@ export function saturateAsync(locations){
   }
 }
 
-export function saturate(definitions){
-  for(let k in definitions){
-    define('.'+k, normalize(definitions[k]))
+export function hydrate(...def_objects){
+  for(let def of def_objects){
+    for(let k in def){
+      define('.'+k,normalize(def[k]))
+    }
   }
 }

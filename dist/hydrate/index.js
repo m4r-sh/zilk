@@ -13,12 +13,12 @@ var esm_default = typeof Promise === "function" ? Promise : function(fn) {
 };
 
 // node_modules/element-notifier/esm/index.js
-var add = function(node) {
-  this.observe(node, { subtree: TRUE, childList: TRUE });
-};
 var TRUE = true;
 var FALSE = false;
 var QSA = "querySelectorAll";
+function add(node) {
+  this.observe(node, { subtree: TRUE, childList: TRUE });
+}
 var notify = (callback, root, MO) => {
   const loop = (nodes, added, removed, connected, pass) => {
     for (let i = 0, { length } = nodes;i < length; i++) {
@@ -218,18 +218,6 @@ var whenDefined = (selector) => {
 };
 
 // src/hydrate/index.js
-function saturateAsync(locations) {
-  for (let k in locations) {
-    defineAsync("." + k, () => locations[k]().then((mod) => ({
-      default: normalize(mod.handlers[k])
-    })));
-  }
-}
-function saturate(definitions) {
-  for (let k in definitions) {
-    define("." + k, normalize(definitions[k]));
-  }
-}
 var toQuery = (x) => x && x[Symbol.toStringTag] === "classified" ? "." + x : x;
 var normalize = (o) => ({
   ...o,
@@ -246,7 +234,21 @@ var normalize = (o) => ({
     }
   }
 });
+function hydrateAsync(locations) {
+  for (let k in locations) {
+    defineAsync("." + k, () => locations[k]().then((mod) => ({
+      default: normalize(mod.handlers[k])
+    })));
+  }
+}
+function hydrate(...def_objects) {
+  for (let def of def_objects) {
+    for (let k in def) {
+      define("." + k, normalize(def[k]));
+    }
+  }
+}
 export {
-  saturateAsync,
-  saturate
+  hydrateAsync,
+  hydrate
 };
