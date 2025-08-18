@@ -1,0 +1,59 @@
+{
+  "version": "0.6.0",
+  "name": "zilk",
+  "description": "lightweight and flexible web framework",
+  "author": {
+    "name": "m4rsh",
+    "email": "me@m4r.sh",
+    "url": "https://m4r.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m4r-sh/zilk.git"
+  },
+  "scripts": {
+    "build": "bun run build:hydrate && bun run build:fetch && bun run build:nav && bun run build:dom && bun run build:ssr",
+    "build:hydrate": "bun build --outfile dist/hydrate.js --target=browser --minify ./src/hydrate/index.js",
+    "build:fetch": "bun build --outfile dist/fetch.js --target=browser --minify ./src/fetch/index.js",
+    "build:nav": "bun build --outfile dist/nav.js --target=browser --minify ./src/nav/index.js",
+    "build:dom": "bun build --outfile dist/dom.js --target=browser --minify ./src/runtime/dom.js",
+    "build:ssr": "bun build --outfile dist/ssr.js --target=browser --minify ./src/runtime/ssr.js"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "bun": "./dist/ssr.js",
+      "node": "./dist/ssr.js",
+      "worker": "./dist/ssr.js",
+      "browser": "./dist/dom.js",
+      "default": "./dist/dom.js"
+    },
+    "./ssr": {
+      "default": "./dist/ssr.js"
+    },
+    "./dom": {
+      "default": "./dist/dom.js"
+    },
+    "./hydrate": {
+      "browser": "./dist/hydrate.js",
+      "default": "./dist/hydrate.js"
+    },
+    "./nav": {
+      "browser": "./dist/nav.js",
+      "default": "./dist/nav.js"
+    },
+    "./fetch": {
+      "bun": "./dist/ssr.js",
+      "node": "./dist/ssr.js",
+      "worker": "./dist/ssr.js",
+      "browser": "./dist/fetch.js",
+      "default": "./dist/fetch.js"
+    }
+  },
+  "dependencies": {
+    "itty-router": "^5.0.18",
+    "uhtml": "^4.7.0",
+    "uhtml-ssr": "^0.9.1",
+    "wicked-elements": "^3.1.2"
+  }
+}
