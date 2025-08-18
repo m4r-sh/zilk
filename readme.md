@@ -8,7 +8,7 @@ light & flexible web framework
 > zilk is actively being built out. It's functional and used on [m4r.sh](https://m4r.sh) and [mfers.lol](https://mfers.lol), but it's not ready for public adoption. 
 
 <p align="center">
-  <img width="300" height="200" src="https://m4r.sh/previews/zilk-tech.gif">
+  <img width="600" height="400" src="https://m4r.sh/previews/zilk-tech.gif">
 </p>
 
 ---
