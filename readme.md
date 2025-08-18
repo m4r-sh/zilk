@@ -7,6 +7,10 @@ light & flexible web framework
 > [!WARNING]  
 > zilk is actively being built out. It's functional and used on [m4r.sh](https://m4r.sh) and [mfers.lol](https://mfers.lol), but it's not ready for public adoption. 
 
+<p align="center">
+  <img width="300" height="200" src="https://m4r.sh/previews/zilk-tech.gif">
+</p>
+
 ---
 
 # Overview
@@ -95,4 +99,4 @@ The performance of `zilk` is largely due to [@WebReflection's](https://github.co
 
 Credit to [navaid](https://github.com/lukeed/navaid/) by [@lukeed](https://github.com/lukeed) for simple browser routing logic.
 
-The developer experience is inspired by Next.js, Svelte, Astro, and other great tools I've used over the years. The JavaScript ecosystem is bustling with innovation, but the overwhelming complexity makes it difficult to leverage these tools without getting stuck. 
+The developer experience is inspired by Next.js, Svelte, Astro, and other great tools I've used over the years. The JavaScript ecosystem is bustling with innovation, but the overwhelming complexity makes it difficult to leverage these tools without getting stuck.
