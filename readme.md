@@ -34,6 +34,15 @@ It's split into two libraries:
 
 # Usage
 
+### Environment Setup
+
+1. Install [[BunJS]](https://bun.com)
+2. Install syntax highlighter [[VSCode]](https://marketplace.visualstudio.com/items?itemName=m4rsh.zilk-highlight) [[TextMate Grammar]](https://github.com/m4r-sh/vscode-zilk-highlight/blob/master/syntaxes/zilk.tmLanguage.json)
+3. Install `zilker` globally: `bun i -g zilker`
+4. Open a new folder and run `zilker setup`
+5. Edit with `zilker dev`
+6. Build for prod with `zilker build <target?>`
+
 ### Example UI Component
 
 1. Render function (HTML)
@@ -107,14 +116,6 @@ LABEL // "Nav-Button__LABEL"</code>
 <p><b>How? </b>classify returns a recursive proxy with a toString() and [Symbol.toPrimitive]() trap. Each layer adds to the original prefix in the output string.
 </details>
 
-### Environment Setup
-
-1. Install BunJS [[bun.com]](https://bun.com)
-2. Install syntax highlighter [[VSCode]](https://marketplace.visualstudio.com/items?itemName=m4rsh.zilk-highlight) [[TextMate Grammar]](https://github.com/m4r-sh/vscode-zilk-highlight/blob/master/syntaxes/zilk.tmLanguage.json)
-3. Install `zilker` globally: `bun i -g zilker`
-4. Open a new folder and run `zilker setup`
-5. Edit with `zilker dev`
-6. Build for prod with `zilker build <target?>`
 
 ---
 

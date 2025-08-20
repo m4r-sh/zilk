@@ -1,4 +1,5 @@
 export function classify(n){
+  n = n.replace(/(^[^A-Za-z_]+)|[^A-Za-z0-9_-]+/g, (m, m1) => m1 ? '' : '-')
   return new Proxy({},{
     get(_,prop){
       if(prop===Symbol.toPrimitive || prop === 'toString'){ return ()=>n }
