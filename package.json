@@ -43,9 +43,9 @@
       "default": "./dist/nav.js"
     },
     "./fetch": {
-      "bun": "./dist/ssr.js",
-      "node": "./dist/ssr.js",
-      "worker": "./dist/ssr.js",
+      "bun": "./dist/fetch.js",
+      "node": "./dist/fetch.js",
+      "worker": "./dist/fetch.js",
       "browser": "./dist/fetch.js",
       "default": "./dist/fetch.js"
     }

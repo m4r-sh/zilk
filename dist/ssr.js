@@ -4,4 +4,4 @@ class E extends WeakMap{set($,Z){return super.set($,Z),Z}}/*! (c) Andrea Giammar
 ${Q}`)}}_+=M}}let B=_.split(`
 `),K=Math.min(...B.map((O)=>O.match(/^(\s+)\S+/)).filter((O)=>O).map((O)=>O[1].length));return _=B.map((O)=>O[0]==" "||O[0]=="\t"?O.slice(K):O).join(`
 `).trim(),W?_.replace(/\\n/g,`
-`):_}var R$=new Proxy(X,{get:($,Z)=>(...z)=>new P(X(...z))}),e=new Proxy(j,{get:($,Z)=>(...z)=>new P(j(...z))}),{css:T$,md:X$}=e,j$=b,L$=k;export{L$ as svgFor,k as svg,l as render,R$ as raw,X$ as md,j$ as htmlFor,b as html,e as fmt,T$ as css,f as classify,P as Hole};
+`):_}var R$=new Proxy(X,{get:($,Z)=>(...z)=>new P(X(...z))}),e=new Proxy(j,{get:($,Z)=>(...z)=>new P(j(...z))}),{css:T$,md:X$,glsl:j$}=e,L$=b,C$=k;export{C$ as svgFor,k as svg,l as render,R$ as raw,X$ as md,L$ as htmlFor,b as html,j$ as glsl,e as fmt,T$ as css,f as classify,P as Hole};
