@@ -23,7 +23,9 @@ It's split into two libraries:
   - **Render HTML**: DOM + SSR tagged template rendering from [`uhtml`](https://github.com/WebReflection/uhtml) and [`uhtml-ssr`](https://github.com/WebReflection/uhtml-ssr)
   - **Hydration**: class-based event handlers from [`wicked-elements`](https://github.com/WebReflection/wicked-elements)
   - **Navigation**: on-page navigation helper (code started as a fork from [`navaid`](https://github.com/lukeed/navaid))
-  - **Router**: Fetch handler to serve SSR Responses from Bun, Node, or Workers
+  - **Router**: Fetch handler to serve SSR Responses from Bun, Node, or Workers using [`itty-router`](https://itty.dev/itty-router)
+
+Zilk provides isomorphic rendering helpers from `zilk`. The additional exports are meant to be used with code generation (`/hydrate`, `/nav`, `/fetch`). 
 
 ## `zilker` (build tool)
   - **File-based**: Intuitive project organization
@@ -41,7 +43,7 @@ It's split into two libraries:
 3. Install `zilker` globally: `bun i -g zilker`
 4. Open a new folder and run `zilker setup`
 5. Edit with `zilker dev`
-6. Build for prod with `zilker build <target?>`
+6. Build for deployment with `zilker build <target?>`
 
 ### Example UI Component
 
