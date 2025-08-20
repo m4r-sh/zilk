@@ -16,8 +16,8 @@
     "build:hydrate": "bun build --outfile dist/hydrate.js --target=browser --minify ./src/hydrate/index.js",
     "build:fetch": "bun build --outfile dist/fetch.js --target=browser --minify ./src/fetch/index.js",
     "build:nav": "bun build --outfile dist/nav.js --target=browser --minify ./src/nav/index.js",
-    "build:dom": "bun build --outfile dist/dom.js --target=browser --minify ./src/runtime/dom.js",
-    "build:ssr": "bun build --outfile dist/ssr.js --target=browser --minify ./src/runtime/ssr.js"
+    "build:dom": "bun build --outfile dist/dom.js --target=browser --minify ./src/dom.js",
+    "build:ssr": "bun build --outfile dist/ssr.js --target=browser --minify ./src/ssr.js"
   },
   "type": "module",
   "exports": {

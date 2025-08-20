@@ -1,5 +1,5 @@
 import { AutoRouter, html } from 'itty-router'
-import { render } from '../runtime/ssr.js'
+import { render } from '../ssr.js'
 import { patternToRegex, matchPath, parseQuery } from '../nav/utils.js';
 
 export function createHandler({ pull, pages, redirects, template }){

@@ -42,11 +42,11 @@ It's split into two libraries:
 
 > At build time, each export is handled differently. All handlers are bundled into a hydration script, all styles are bundled into a CSS stylesheet, and the render functions are bundled with the browser-side router. Server-side rendering only requires the render function, which is the default export.
 
-```js
+~~~js
 // views/Example.js
 import { html, css, classify } from 'zilk'
 
-let { TITLE, BUTTON } = classify('Example')
+const { TITLE, BUTTON } = classify('Example')
 
 // 1. Render function (used for SSR and browser rendering)
 export default ({
@@ -66,10 +66,10 @@ export default ({
 export let handlers = {
   [BUTTON]: {
     init(){
-      console.log('Button initialized')
+      console.log('Runs once per element')
     },
     onclick(event){
-      console.log('Button click')
+      console.log('Click event')
     }
   }
 }
@@ -89,14 +89,63 @@ export let style = () => css`
   }
 `
 
-```
+~~~
+
+<details>
+<summary>Why <code>classify?</code></summary>
+<p>Classes are the glue that connects the HTML, CSS, and javascript event handlers.</p>
+<p>You could also use normal strings, but manually managing string names is notoriously problematic.</p>
+<p><code>classify()</code> automatically scopes nested css classnames, so you don't have to write long unique strings across files. It's recommended to pass a string that mirrors the file path.
+<pre lang="javascript" class="language-javascript">
+<code>// views/Nav/Button.js
+let { OUTER, INNER, LABEL, ICON } = classify('Nav/Button')
+
+OUTER // "Nav-Button__OUTER"
+LABEL // "Nav-Button__LABEL"</code>
+</pre>
+
+<p><b>How? </b>classify returns a recursive proxy with a toString() and [Symbol.toPrimitive]() trap. Each layer adds to the original prefix in the output string.
+</details>
+
+### Environment Setup
+
+1. Install BunJS [[bun.com]](https://bun.com)
+2. Install syntax highlighter [[VSCode]](https://marketplace.visualstudio.com/items?itemName=m4rsh.zilk-highlight) [[TextMate Grammar]](https://github.com/m4r-sh/vscode-zilk-highlight/blob/master/syntaxes/zilk.tmLanguage.json)
+3. Install `zilker` globally: `bun i -g zilker`
+4. Open a new folder and run `zilker setup`
+5. Edit with `zilker dev`
+6. Build for prod with `zilker build <target?>`
+
+---
+
+# Exports
+
+### [`zilk/dom`](https://github.com/m4r-sh/zilk/blob/master/src/dom.js) **(3.8 kB)**
+
+main export from `zilk` for rendering on the browser
+
+### [`zilk/ssr`](https://github.com/m4r-sh/zilk/blob/master/src/ssr.js) **(2.2 kB)**
+
+main export from `zilk` for server-side rendering on Bun, Workers, NodeJS
+
+### [`zilk/hydrate`](https://github.com/m4r-sh/zilk/blob/master/src/hydrate/index.js) **(1.8 kB)**
+
+Ideal exports for generating a hydration script (`hydrate.js`)
+
+### [`zilk/nav`](https://github.com/m4r-sh/zilk/blob/master/src/nav/index.js) **(1.6 kB)**
+
+Ideal export for generating a client-side routing script (`nav.js`)
+
+### [`zilk/fetch`](https://github.com/m4r-sh/zilk/blob/master/src/fetch/index.js) **(3.2 kB)**
+
+Ideal export for generating a server-side request handler
 
 ---
 
 # Credits
 
-The performance of `zilk` is largely due to [@WebReflection's](https://github.com/WebReflection/) incredible work on [`uhtml`](https://github.com/WebReflection/uhtml), [`wicked-elements`](https://github.com/WebReflection/wicked-elements), and other top-tier JS libraries. He's a JavaScript legend. 
+The performance of `zilk` is largely due to [@WebReflection's](https://github.com/WebReflection/) incredible work on [`uhtml`](https://github.com/WebReflection/uhtml), [`wicked-elements`](https://github.com/WebReflection/wicked-elements), and other top-tier JS libraries.
 
-Credit to [navaid](https://github.com/lukeed/navaid/) by [@lukeed](https://github.com/lukeed) for simple browser routing logic.
+Credit to [`navaid`](https://github.com/lukeed/navaid/) for simple client-side navigation logic, and to [`itty-router`](https://itty.dev/itty-router) for minimal route matching.
 
 The developer experience is inspired by Next.js, Svelte, Astro, and other great tools I've used over the years. The JavaScript ecosystem is bustling with innovation, but the overwhelming complexity makes it difficult to leverage these tools without getting stuck.
