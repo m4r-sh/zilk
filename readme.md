@@ -123,11 +123,11 @@ LABEL // "Nav-Button__LABEL"</code>
 
 # Exports
 
-### [`zilk/dom`](https://github.com/m4r-sh/zilk/blob/master/src/dom.js) **(3.8 kB)**
+### [`zilk/dom`](https://github.com/m4r-sh/zilk/blob/master/src/dom.js) **(4.7 kB)**
 
 main export from `zilk` for rendering on the browser
 
-### [`zilk/ssr`](https://github.com/m4r-sh/zilk/blob/master/src/ssr.js) **(2.2 kB)**
+### [`zilk/ssr`](https://github.com/m4r-sh/zilk/blob/master/src/ssr.js) **(3.0 kB)**
 
 main export from `zilk` for server-side rendering on Bun, Workers, NodeJS
 
@@ -139,7 +139,7 @@ Ideal exports for generating a hydration script (`hydrate.js`)
 
 Ideal export for generating a client-side routing script (`nav.js`)
 
-### [`zilk/fetch`](https://github.com/m4r-sh/zilk/blob/master/src/fetch/index.js) **(3.2 kB)**
+### [`zilk/fetch`](https://github.com/m4r-sh/zilk/blob/master/src/fetch/index.js) **(4.0 kB)**
 
 Ideal export for generating a server-side request handler
 

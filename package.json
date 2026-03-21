@@ -51,6 +51,7 @@
     }
   },
   "dependencies": {
+    "@m4rsh/cones": "^1.0.0",
     "itty-router": "^5.0.18",
     "uhtml": "^4.7.0",
     "uhtml-ssr": "^0.9.1",

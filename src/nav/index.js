@@ -1,5 +1,8 @@
-export function createRouter({ pull='pull', pages = {}, redirects = {} } = {}) {
-  // Route storage and lifecycle callbacks
+export function createRouter({ pull = 'pull', pages = {}, redirects = {} } = {}) {
+  /* ------------------------------------------------------------------ */
+  /* Internal State                                                     */
+  /* ------------------------------------------------------------------ */
+
   const routes = [];
   const listeners = {
     onStart: [],
@@ -9,126 +12,190 @@ export function createRouter({ pull='pull', pages = {}, redirects = {} } = {}) {
     onError: [],
     onCancel: []
   };
+
   let transitionHandler = null;
-  let isRouting = false; // Tracks if a route is in progress
-  let canCancel = false; // Tracks if cancelation is still possible
+  let isRouting = false;
 
+  /* ------------------------------------------------------------------ */
+  /* Internal History (authoritative)                                   */
+  /* ------------------------------------------------------------------ */
 
-  // Load or initialize custom history stack
-  let historyStack = JSON.parse(sessionStorage.getItem('routerHistory') || '[]');
-  function saveHistoryStack() {
-    sessionStorage.setItem('routerHistory', JSON.stringify(historyStack));
+  const HISTORY_KEY = 'router:history';
+  const SCROLL_KEY = 'router:scroll';
+
+  let historyState = loadHistory();
+  let scrollState = loadScroll();
+
+  function loadHistory() {
+    try {
+      const raw = sessionStorage.getItem(HISTORY_KEY);
+      if (!raw) throw 0;
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed.stack)) throw 0;
+      return parsed;
+    } catch {
+      return {
+        stack: [normalize(location.pathname + location.search)],
+        index: 0
+      };
+    }
   }
 
-  // Register pages as routes with itty-router's pattern matching
+  function saveHistory() {
+    sessionStorage.setItem(HISTORY_KEY, JSON.stringify(historyState));
+  }
+
+  function loadScroll() {
+    try {
+      return JSON.parse(sessionStorage.getItem(SCROLL_KEY)) || {};
+    } catch {
+      return {};
+    }
+  }
+
+  function saveScrollState() {
+    sessionStorage.setItem(SCROLL_KEY, JSON.stringify(scrollState));
+  }
+
+  function saveScroll(url) {
+    scrollState[url] = {
+      x: window.scrollX,
+      y: window.scrollY
+    };
+    saveScrollState();
+  }
+
+  function restoreScroll(url) {
+    const pos = scrollState[url];
+    if (!pos) return;
+    requestAnimationFrame(() => {
+      window.scrollTo(pos.x, pos.y);
+    });
+  }
+
+  function current() {
+    return historyState.stack[historyState.index];
+  }
+
+  function canBack() {
+    return historyState.index > 0;
+  }
+
+  function canForward() {
+    return historyState.index < historyState.stack.length - 1;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Utilities                                                          */
+  /* ------------------------------------------------------------------ */
+
+  function normalize(url) {
+    const u = new URL(url, location.origin);
+    const path = u.pathname.replace(/\/+$/, '') || '/';
+    return path + u.search;
+  }
+
+  function trigger(event, arg) {
+    if (event === 'onBefore') {
+      return listeners[event].every(cb => cb(arg) !== false);
+    }
+    listeners[event].forEach(cb => cb(arg));
+    return true;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Route Registration                                                 */
+  /* ------------------------------------------------------------------ */
+
   for (const [pattern, mod] of Object.entries(pages)) {
     const regex = RegExp(
       '^' +
-      (('/' + pattern).replace(/\/+(\/|$)/g, '$1'))
-        .replace(/(\/?\.?):(\w+)\+/g, '($1(?<$2>*))')  // Greedy params
-        .replace(/(\/?\.?):(\w+)/g, '($1(?<$2>[^$1/]+?))') // Named params
-        .replace(/\./g, '\\.')                          // Escape dots
-        .replace(/(\/?)\*/g, '($1.*)?')                 // Wildcard
-      + '/*$'
+        (('/' + pattern).replace(/\/+(\/|$)/g, '$1'))
+          .replace(/(\/?\.?):(\w+)\+/g, '($1(?<$2>*))')
+          .replace(/(\/?\.?):(\w+)/g, '($1(?<$2>[^$1/]+?))')
+          .replace(/\./g, '\\.')
+          .replace(/(\/?)\*/g, '($1.*)?') +
+        '/*$'
     );
-    routes.push({ regex, handler: async req => {
-      if(mod[pull]){ req.pull = await mod[pull](req) }
-      let [meta, content] = await Promise.all([mod.meta(req),mod.content(req)])
-      return { meta, content, req }
-    } });
+
+    routes.push({
+      regex,
+      handler: async (req) => {
+        if (mod[pull]) req.pull = await mod[pull](req);
+        const [meta, content] = await Promise.all([
+          mod.meta(req),
+          mod.content(req)
+        ]);
+        return { meta, content, req };
+      }
+    });
   }
 
-  // Match a path against routes or redirects
-  function match(url) {
-    const { pathname, searchParams } = new URL(url, location.origin);
-    let path = pathname.replace(/\/+$/, '') || '/';
+  /* ------------------------------------------------------------------ */
+  /* Matching                                                           */
+  /* ------------------------------------------------------------------ */
 
-    // Check redirects
+  function match(url) {
+    const u = new URL(url, location.origin);
+    const path = normalize(u.pathname);
+
     if (redirects[path]) {
       return { redirect: redirects[path] };
     }
 
-    // Parse query params
     const query = {};
-    for (let [k, v] of searchParams) {
+    for (const [k, v] of u.searchParams) {
       query[k] = query[k] ? [].concat(query[k], v) : v;
     }
 
-    // Match routes
     for (const { regex, handler } of routes) {
-      const match = path.match(regex);
-      if (match) {
-        const params = match.groups || {};
-        return { handler, params, query };
+      const m = path.match(regex);
+      if (m) {
+        return { handler, params: m.groups || {}, query };
       }
     }
+
     return null;
   }
 
-  // Trigger lifecycle callbacks
-  function trigger(event, arg) {
-    if (event === 'onBefore') {
-      // Check if any onBefore callback returns false
-      return listeners[event].every(cb => cb(arg) !== false);
-    }
-    listeners[event].forEach(cb => cb(arg));
-    return true; // Default to true for non-onBefore events
-  }
+  /* ------------------------------------------------------------------ */
+  /* Core Render                                                        */
+  /* ------------------------------------------------------------------ */
 
-  // Perform routing with redirect depth tracking
-  async function route(uri, replace = false, redirectDepth = 0,should_render=true) {
-    const MAX_REDIRECT_DEPTH = 8;
-    uri = uri.replace(/\/+$/, '') || '/';
-    const currentPath = location.pathname.replace(/\/+$/, '') || '/';
-
-    if (uri === currentPath && !replace) return;
-    // Add to history stack (only on push, not replace)
-    if (!replace) {
-      historyStack.push(uri);
-      saveHistoryStack();
-    } else {
-      historyStack[historyStack.length - 1] = uri;
-      saveHistoryStack();
-    }
-
-    if (isRouting) {
-      console.warn('Route already in progress, ignoring:', uri);
-      return;
-    }
-
+  async function render(url, source) {
+    if (isRouting) return;
     isRouting = true;
-    canCancel = true;
-    trigger('onStart', uri);
 
-    const matchResult = match(location.origin + uri);
+    trigger('onStart', { url, source });
+
+    const matchResult = match(url);
     if (!matchResult) {
-      trigger('onError', new Error(`No route found for ${uri}`));
+      trigger('onError', new Error(`No route found for ${url}`));
       isRouting = false;
-      canCancel = false;
       return;
     }
 
     if (matchResult.redirect) {
-      if (redirectDepth >= MAX_REDIRECT_DEPTH) {
-        trigger('onError', new Error(`Redirect depth exceeded (${MAX_REDIRECT_DEPTH}) at ${uri}`));
-        isRouting = false;
-        canCancel = false;
-        return;
-      }
-      history[replace ? 'replaceState' : 'pushState']({}, '', matchResult.redirect);
-      isRouting = false; // Reset before recursive call
-      await route(matchResult.redirect, true, redirectDepth + 1);
+      const next = normalize(matchResult.redirect);
+
+      // Replace URL in browser + internal history
+      historyState.stack[historyState.index] = next;
+      history.replaceState(null, '', next);
+      saveHistory();
+
+      // Continue rendering with redirected URL
+      isRouting = false;
+      render(next, 'redirect');
       return;
     }
+
 
     const { handler, params, query } = matchResult;
     const req = { params, query };
 
-    // Check onBefore; cancel if any return false
     if (!trigger('onBefore', req)) {
-      trigger('onCancel', uri);
+      trigger('onCancel', url);
       isRouting = false;
-      canCancel = false;
       return;
     }
 
@@ -136,95 +203,143 @@ export function createRouter({ pull='pull', pages = {}, redirects = {} } = {}) {
       const result = await handler(req);
       trigger('onReady', result);
 
-      if (!canCancel) {
-        console.warn('Route canceled too late:', uri);
-      } else if (transitionHandler) {
-        canCancel = false; // No cancelation after this point
-        if(should_render){
-          transitionHandler({...result, history: historyStack});
-        }
-        history[replace ? 'replaceState' : 'pushState']({}, '', uri);
-        trigger('onAfter', result);
-      } else {
-        console.warn('No transition handler set for route:', uri);
+      if (transitionHandler) {
+        transitionHandler({
+          ...result,
+          history: historyState.stack,
+          index: historyState.index,
+          source
+        });
       }
-    } catch (error) {
-      trigger('onError', error);
+
+      if (source === 'history' || source === 'back' || source === 'forward') {
+        restoreScroll(url);
+      } else {
+        window.scrollTo(0, 0);
+      }
+
+      trigger('onAfter', result);
+    } catch (err) {
+      trigger('onError', err);
     } finally {
       isRouting = false;
-      canCancel = false;
     }
   }
 
-  // Click handler for navigation
-  function clickHandler(e) {
-    const link = e.target.closest('a');
-    if (!link) return;
-    const href = link.getAttribute('href');
-    if (!href || link.target || link.host !== location.host || href[0] === '#' || link.hasAttribute('download')) return;
-    if (href[0] === '/') {
-      e.preventDefault();
-      route(href);
+  /* ------------------------------------------------------------------ */
+  /* Navigation API (public)                                            */
+  /* ------------------------------------------------------------------ */
+
+  function route(url, { replace = false, source = 'programmatic' } = {}) {
+    const next = normalize(url);
+    const curr = current();
+
+    if (next === curr && !replace) return;
+
+    if (replace) {
+      historyState.stack[historyState.index] = next;
+      history.replaceState(null, '', next);
+    } else {
+      historyState.stack.length = historyState.index + 1;
+      historyState.stack.push(next);
+      historyState.index++;
+      history.pushState(null, '', next);
+    }
+
+    saveHistory();
+    render(next, source);
+  }
+
+  function back(fallback = '/') {
+    if (canBack()) {
+      saveScroll(current());
+      historyState.index--;
+      const url = current();
+      history.replaceState(null, '', url);
+      saveHistory();
+      render(url, 'back');
+    } else {
+      route(fallback, { replace: true, source: 'fallback' });
     }
   }
 
-  // Subscribe to lifecycle events with unsubscribe
+  function forward() {
+    if (!canForward()) return;
+    saveScroll(current());
+    historyState.index++;
+    const url = current();
+    history.replaceState(null, '', url);
+    saveHistory();
+    render(url, 'forward');
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Browser Back / Forward                                             */
+  /* ------------------------------------------------------------------ */
+
+  addEventListener('popstate', () => {
+    saveScroll(current());
+
+    const url = normalize(location.pathname + location.search);
+    const idx = historyState.stack.indexOf(url);
+
+    if (idx !== -1) {
+      historyState.index = idx;
+    } else {
+      historyState.stack = [url];
+      historyState.index = 0;
+    }
+
+    saveHistory();
+    render(url, 'history');
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* Link Interception                                                  */
+  /* ------------------------------------------------------------------ */
+
+  addEventListener('click', (e) => {
+    const a = e.target.closest('a');
+    if (!a) return;
+    if (a.target || a.host !== location.host) return;
+
+    const href = a.getAttribute('href');
+    if (!href || href[0] === '#') return;
+
+    e.preventDefault();
+    route(href, { source: 'link' });
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* Public API                                                         */
+  /* ------------------------------------------------------------------ */
+
   function subscribe(event) {
-    return (callback) => {
-      listeners[event].push(callback);
+    return (cb) => {
+      listeners[event].push(cb);
       return () => {
-        listeners[event] = listeners[event].filter(cb => cb !== callback);
+        listeners[event] = listeners[event].filter(x => x !== cb);
       };
     };
   }
 
-  // Router API
-  const router = {
-    route: route,
+  return {
+    route,
+    back,
+    forward,
+
     onStart: subscribe('onStart'),
     onBefore: subscribe('onBefore'),
     onReady: subscribe('onReady'),
     onAfter: subscribe('onAfter'),
     onError: subscribe('onError'),
     onCancel: subscribe('onCancel'),
-    performTransition(callback) {
+
+    performTransition(cb) {
       if (transitionHandler) {
         throw new Error('performTransition can only be set once');
       }
-      transitionHandler = callback;
-    },
-    cancel() {
-      if (!isRouting || !canCancel) {
-        console.warn('Cannot cancel: No active route or cancelation period has passed');
-        return;
-      }
-      trigger('onCancel', location.pathname);
-      isRouting = false;
-      canCancel = false;
-    },
-    history: historyStack
+      transitionHandler = cb;
+    }
   };
-
-  // Take over routing
-  wrap('push');
-  wrap('replace');
-  addEventListener('popstate', () => route(location.pathname + location.search,true));
-  addEventListener('replacestate', () => route(location.pathname + location.search,true,0,false));
-  addEventListener('pushstate', () => route(location.pathname + location.search,true));
-  addEventListener('click', clickHandler);
-  // TODO: need?
-
-  return router;
-}
-
-function wrap(type, fn) {
-	if (history[type]) return;
-	history[type] = type;
-	fn = history[type += 'State'];
-	history[type] = function (uri) {
-		var ev = new Event(type.toLowerCase());
-		ev.uri = uri;
-		fn.apply(this, arguments);
-		return dispatchEvent(ev);
-	}
 }
