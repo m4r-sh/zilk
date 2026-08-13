@@ -1,6 +1,6 @@
 import { AutoRouter, html } from 'itty-router'
 import { render } from '../ssr.js'
-import { patternToRegex, matchPath, parseQuery } from '../nav/utils.js';
+import { patternToRegex, routeEntries } from '../nav/utils.js';
 
 export function createHandler({ pull, pages, redirects, template }){
   const router = AutoRouter()
@@ -27,7 +27,7 @@ export function createHandler({ pull, pages, redirects, template }){
     }
   })
   
-  Object.entries(pages).forEach(([pattern,mod]) => {
+  routeEntries(pages).forEach(([pattern,mod]) => {
     router.get(pattern,(req) => writeHTML(mod,req))
   })
   

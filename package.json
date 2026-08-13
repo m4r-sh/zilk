@@ -5,17 +5,18 @@
   "author": {
     "name": "m4rsh",
     "email": "me@m4r.sh",
-    "url": "https://m4r.sh"
+    "url": "https://m4rsh.com/zilk"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/m4r-sh/zilk.git"
   },
   "scripts": {
-    "build": "bun run build:hydrate && bun run build:fetch && bun run build:nav && bun run build:dom && bun run build:ssr",
+    "build": "bun run build:hydrate && bun run build:fetch && bun run build:nav && bun run build:navigation && bun run build:dom && bun run build:ssr",
     "build:hydrate": "bun build --outfile dist/hydrate.js --target=browser --minify ./src/hydrate/index.js",
     "build:fetch": "bun build --outfile dist/fetch.js --target=browser --minify ./src/fetch/index.js",
     "build:nav": "bun build --outfile dist/nav.js --target=browser --minify ./src/nav/index.js",
+    "build:navigation": "bun build --outfile dist/navigation.js --target=browser --minify ./src/navigation/index.js",
     "build:dom": "bun build --outfile dist/dom.js --target=browser --minify ./src/dom.js",
     "build:ssr": "bun build --outfile dist/ssr.js --target=browser --minify ./src/ssr.js"
   },
@@ -42,6 +43,10 @@
       "browser": "./dist/nav.js",
       "default": "./dist/nav.js"
     },
+    "./navigation": {
+      "browser": "./dist/navigation.js",
+      "default": "./dist/navigation.js"
+    },
     "./fetch": {
       "bun": "./dist/fetch.js",
       "node": "./dist/fetch.js",
@@ -51,7 +56,7 @@
     }
   },
   "dependencies": {
-    "@m4rsh/cones": "^1.0.0",
+    "@m4rsh/cones": "^1.2.1",
     "itty-router": "^5.0.18",
     "uhtml": "^4.7.0",
     "uhtml-ssr": "^0.9.1",

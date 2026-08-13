@@ -1,3 +1,5 @@
+import { patternToRegex, routeEntries } from './utils.js';
+
 export function createRouter({ pull = 'pull', pages = {}, redirects = {} } = {}) {
   /* ------------------------------------------------------------------ */
   /* Internal State                                                     */
@@ -15,6 +17,7 @@ export function createRouter({ pull = 'pull', pages = {}, redirects = {} } = {})
 
   let transitionHandler = null;
   let isRouting = false;
+  const MAX_REDIRECT_DEPTH = 8;
 
   /* ------------------------------------------------------------------ */
   /* Internal History (authoritative)                                   */
@@ -107,17 +110,8 @@ export function createRouter({ pull = 'pull', pages = {}, redirects = {} } = {})
   /* Route Registration                                                 */
   /* ------------------------------------------------------------------ */
 
-  for (const [pattern, mod] of Object.entries(pages)) {
-    const regex = RegExp(
-      '^' +
-        (('/' + pattern).replace(/\/+(\/|$)/g, '$1'))
-          .replace(/(\/?\.?):(\w+)\+/g, '($1(?<$2>*))')
-          .replace(/(\/?\.?):(\w+)/g, '($1(?<$2>[^$1/]+?))')
-          .replace(/\./g, '\\.')
-          .replace(/(\/?)\*/g, '($1.*)?') +
-        '/*$'
-    );
-
+  for (const [pattern, mod] of routeEntries(pages)) {
+    const regex = patternToRegex(pattern);
     routes.push({
       regex,
       handler: async (req) => {
@@ -162,7 +156,7 @@ export function createRouter({ pull = 'pull', pages = {}, redirects = {} } = {})
   /* Core Render                                                        */
   /* ------------------------------------------------------------------ */
 
-  async function render(url, source) {
+  async function render(url, source, redirectDepth = 0) {
     if (isRouting) return;
     isRouting = true;
 
@@ -176,6 +170,14 @@ export function createRouter({ pull = 'pull', pages = {}, redirects = {} } = {})
     }
 
     if (matchResult.redirect) {
+      if (redirectDepth >= MAX_REDIRECT_DEPTH) {
+        trigger('onError', new Error(
+          `Redirect depth exceeded (${MAX_REDIRECT_DEPTH}) at ${url}`
+        ));
+        isRouting = false;
+        return;
+      }
+
       const next = normalize(matchResult.redirect);
 
       // Replace URL in browser + internal history
@@ -185,7 +187,7 @@ export function createRouter({ pull = 'pull', pages = {}, redirects = {} } = {})
 
       // Continue rendering with redirected URL
       isRouting = false;
-      render(next, 'redirect');
+      render(next, 'redirect', redirectDepth + 1);
       return;
     }
 
@@ -299,9 +301,18 @@ export function createRouter({ pull = 'pull', pages = {}, redirects = {} } = {})
   /* ------------------------------------------------------------------ */
 
   addEventListener('click', (e) => {
+    if (
+      e.defaultPrevented ||
+      e.button !== 0 ||
+      e.metaKey ||
+      e.ctrlKey ||
+      e.shiftKey ||
+      e.altKey
+    ) return;
+
     const a = e.target.closest('a');
     if (!a) return;
-    if (a.target || a.host !== location.host) return;
+    if (a.target || a.hasAttribute('download') || a.host !== location.host) return;
 
     const href = a.getAttribute('href');
     if (!href || href[0] === '#') return;
