@@ -20,8 +20,6 @@ UI components are defined **in pure javascript** with **colocated definitions**.
 
 zilk is not feature-rich. Instead of learning new API's and syntax, it should feel like writing vanilla HTML, CSS, and JavaScript. No JSX, no DSL's: *just tagged template literals*.
 
-By separting handlers, styles, markup, and markdown into different exported functions, we can see all of the behavior in one file, while our build process can extract each export as needed.
-
 ## How it works
 
 zilk was designed in tandem with zilker.
@@ -29,6 +27,8 @@ zilk was designed in tandem with zilker.
 zilk provides the runtime utilities for isomorphic rendering, scoped classnames, ssr routing, hydration, and client-side navigation.
 
 zilker is the recommended build tool for transforming zilk components into complete webpages with all of the necessary output files.
+
+By separting handlers, styles, markup, and markdown into different exported functions, we can see all of the behavior in one file, while our build process can extract each export as needed.
 
 ---
 
