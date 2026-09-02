@@ -1,8 +1,12 @@
-# zilk
+<div align="center">
+  <img src="docs/media/icon.webp" alt="zilk" width="160px" height="160px" />
+</div>
 
-light & flexible web framework
+<h1 align="center">zilk</h1>
 
-![Zilk Logo](/docs/media/logo.webp)
+<div align="center">lightweight web framework</div>
+
+<br/>
 
 ---
 
