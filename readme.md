@@ -18,7 +18,7 @@ zilk is designed for authoring isomorphic web components (just like React, Svelt
 
 UI components are defined **in pure javascript** with **colocated definitions**.
 
-zilk is not feature-rich. Instead of learning new API's and syntax, it should feel like writing vanilla HTML, CSS, and JavaScript. No JSX, no DSL's, just tagged template literals.
+zilk is not feature-rich. Instead of learning new API's and syntax, it should feel like writing vanilla HTML, CSS, and JavaScript. No JSX, no DSL's: *just tagged template literals*.
 
 By separting handlers, styles, markup, and markdown into different exported functions, we can see all of the behavior in one file, while our build process can extract each export as needed.
 
@@ -34,9 +34,10 @@ zilker is the recommended build tool for transforming zilk components into compl
 
 ## Example
 
+highlighting by [argiope](https://github.com/m4r-sh/argiope) (a plugin built specifically for working with zilk)
+
 ![Zilk Example](docs/media/example.png)
 
-highlighting by [argiope](https://github.com/m4r-sh/argiope) (a plugin built specifically for working with zilk)
 
 ---
 
