@@ -10,6 +10,28 @@
 
 ---
 
+## Motivation
+
+zilk is designed for authoring isomorphic web components (just like React, Svelte, Vue, etc).
+
+*So what's different?*
+
+UI components are defined **in pure javascript** with **colocated definitions**.
+
+zilk is not feature-rich. Instead of learning new API's and syntax, it should feel like writing vanilla HTML, CSS, and JavaScript. No JSX, no DSL's, just tagged template literals.
+
+By separting our handlers, styles, and markup into different exported functions, we can see all of the behavior in one file, while our build process can extract them as needed.
+
+## How it works
+
+zilk was designed in tandem with `zilker`.
+
+zilk provides the runtime essentials for isomorphic rendering, scoped classnames, and utilities for ssr routing, hydration, and client-side navigation.
+
+zilker is the recommended tool for transforming zilk components into complete webpages with all of the necessary output files.
+
+---
+
 # Exports
 
 ### [`zilk/dom`](https://github.com/m4r-sh/zilk/blob/master/src/dom.js) 
