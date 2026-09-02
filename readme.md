@@ -2,6 +2,8 @@
 
 light & flexible web framework
 
+![Zilk Logo](/docs/media/logo.webp)
+
 ---
 
 # Exports
