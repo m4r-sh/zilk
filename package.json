@@ -19,6 +19,11 @@
      "index.d.ts"
   ],
   "types": "./index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": ["index.d.ts"]
+    }
+  },
   "scripts": {
     "build": "bun run build:hydrate && bun run build:fetch && bun run build:nav && bun run build:navigation && bun run build:dom && bun run build:ssr",
     "build:hydrate": "bun build --outfile dist/hydrate.js --target=browser --minify ./src/hydrate/index.js",
@@ -31,6 +36,7 @@
   "type": "module",
   "exports": {
     ".": {
+      "types": "./index.d.ts",
       "bun": "./dist/ssr.js",
       "node": "./dist/ssr.js",
       "worker": "./dist/ssr.js",
@@ -38,24 +44,30 @@
       "default": "./dist/dom.js"
     },
     "./ssr": {
+      "types": "./index.d.ts",
       "default": "./dist/ssr.js"
     },
     "./dom": {
+      "types": "./index.d.ts",
       "default": "./dist/dom.js"
     },
     "./hydrate": {
+      "types": "./index.d.ts",
       "browser": "./dist/hydrate.js",
       "default": "./dist/hydrate.js"
     },
     "./nav": {
+      "types": "./index.d.ts",
       "browser": "./dist/nav.js",
       "default": "./dist/nav.js"
     },
     "./navigation": {
+      "types": "./index.d.ts",
       "browser": "./dist/navigation.js",
       "default": "./dist/navigation.js"
     },
     "./fetch": {
+      "types": "./index.d.ts",
       "bun": "./dist/fetch.js",
       "node": "./dist/fetch.js",
       "worker": "./dist/fetch.js",

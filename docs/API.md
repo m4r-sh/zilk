@@ -23,6 +23,3 @@ Experimental client-side routing built on the browser Navigation API
 ### [`zilk/fetch`](https://github.com/m4r-sh/zilk/blob/master/src/fetch/index.js) 
 
 Ideal export for generating a server-side request handler
-
----
-
