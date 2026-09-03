@@ -6,6 +6,16 @@
 
 <div align="center">lightweight web framework</div>
 
+<div align="center">
+  <a href="https://m4rsh.com/argiope">
+    Blog
+  </a>
+  <span>•</span>
+  <a href="https://npmjs.org/package/zilk">
+    NPM
+  </a>
+</div>
+
 <br/>
 
 ---
