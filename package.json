@@ -11,6 +11,14 @@
     "type": "git",
     "url": "git+https://github.com/m4r-sh/zilk.git"
   },
+  "files": [
+     "dist",
+     "README.md",
+     "docs/API.md",
+     "license",
+     "index.d.ts"
+  ],
+  "types": "./index.d.ts",
   "scripts": {
     "build": "bun run build:hydrate && bun run build:fetch && bun run build:nav && bun run build:navigation && bun run build:dom && bun run build:ssr",
     "build:hydrate": "bun build --outfile dist/hydrate.js --target=browser --minify ./src/hydrate/index.js",
